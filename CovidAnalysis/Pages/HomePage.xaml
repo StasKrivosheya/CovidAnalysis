@@ -3,5 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CovidAnalysis.Pages.HomePage"
              Title="{Binding Title}">
+
+    <StackLayout>
+
+        <Button Text="Download last csv"
+                Command="{Binding DownloadCommand}"/>
+
+        <ActivityIndicator VerticalOptions="CenterAndExpand"
+                           HorizontalOptions="CenterAndExpand"
+                           IsVisible="{Binding IsDownloading}"
+                           IsRunning="{Binding IsDownloading}"/>
+
+    </StackLayout>
     
 </ContentPage>
