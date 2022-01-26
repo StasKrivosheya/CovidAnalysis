@@ -1,4 +1,6 @@
-﻿using Prism;
+﻿using CovidAnalysis.Pages;
+using CovidAnalysis.ViewModels;
+using Prism;
 using Prism.Ioc;
 using Prism.Unity;
 using Xamarin.Forms;
@@ -13,7 +15,7 @@ namespace CovidAnalysis
         {
             InitializeComponent();
 
-            await NavigationService.NavigateAsync(nameof(MainPage));
+            await NavigationService.NavigateAsync($"{nameof(NavigationPage)}/{nameof(HomePage)}");
         }
 
         protected override void OnStart()
@@ -31,7 +33,7 @@ namespace CovidAnalysis
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<NavigationPage>();
-            containerRegistry.RegisterForNavigation<MainPage>();
+            containerRegistry.RegisterForNavigation<HomePage, HomePageViewModel>();
         }
     }
 }
