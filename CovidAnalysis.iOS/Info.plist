@@ -34,5 +34,9 @@
     <string>CovidAnalysis</string>
     <key>XSAppIconAssets</key>
     <string>Assets.xcassets/AppIcon.appiconset</string>
+    <key>NSPhotoLibraryAddUsageDescription </key>
+    <string>Need permission to save files.</string>
+    <key>NSPhotoLibraryUsageDescription </key>
+    <string>Need permission to access files.</string>
 </dict>
 </plist>
