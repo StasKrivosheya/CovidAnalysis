@@ -6,6 +6,8 @@ using Android.Runtime;
 using Android.OS;
 using Prism;
 using Prism.Ioc;
+using CovidAnalysis.Services.Downloader;
+using CovidAnalysis.Droid.Services;
 
 namespace CovidAnalysis.Droid
 {
@@ -31,6 +33,7 @@ namespace CovidAnalysis.Droid
         {
             public void RegisterTypes(IContainerRegistry containerRegistry)
             {
+                containerRegistry.RegisterSingleton<IDownloader, AndroidDownloader>();
             }
         }
     }

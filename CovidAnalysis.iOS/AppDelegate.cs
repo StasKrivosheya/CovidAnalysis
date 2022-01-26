@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using CovidAnalysis.iOS.Services;
+using CovidAnalysis.Services.Downloader;
 using Foundation;
 using Prism;
 using Prism.Ioc;
@@ -34,6 +35,7 @@ namespace CovidAnalysis.iOS
         {
             public void RegisterTypes(IContainerRegistry containerRegistry)
             {
+                containerRegistry.RegisterSingleton<IDownloader, iOSDownloader>();
             }
         }
     }

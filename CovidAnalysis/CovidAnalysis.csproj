@@ -21,10 +21,14 @@
     <None Remove="Pages\" />
     <None Remove="ViewModels\" />
     <None Remove="Services\" />
+    <None Remove="Services\Downloader\" />
+    <None Remove="Events\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
     <Folder Include="ViewModels\" />
     <Folder Include="Services\" />
+    <Folder Include="Services\Downloader\" />
+    <Folder Include="Events\" />
   </ItemGroup>
 </Project>
