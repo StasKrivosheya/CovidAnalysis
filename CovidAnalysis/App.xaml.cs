@@ -1,4 +1,5 @@
 ﻿using CovidAnalysis.Pages;
+using CovidAnalysis.Services.StreamDownloader;
 using CovidAnalysis.ViewModels;
 using Prism;
 using Prism.Ioc;
@@ -32,8 +33,12 @@ namespace CovidAnalysis
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            // navigation
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<HomePage, HomePageViewModel>();
+
+            // services
+            containerRegistry.RegisterInstance<IStreamDownloader>(Container.Resolve<StreamDownloader>());
         }
     }
 }

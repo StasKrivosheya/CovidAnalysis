@@ -1,8 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Events;
-using CovidAnalysis.Services.Downloader;
+using CovidAnalysis.Models.LogEntryItem;
+using CovidAnalysis.Services.StreamDownloader;
 using Prism.Commands;
 using Prism.Navigation;
 
@@ -10,16 +17,18 @@ namespace CovidAnalysis.ViewModels
 {
     public class HomePageViewModel : BaseViewModel
     {
-        private readonly IDownloader _downloader;
+        // tmp aka storage <ISO-code, entries>
+        private Dictionary<string, List<LogEntryItemModel>> _logEntries = new Dictionary<string, List<LogEntryItemModel>>();
+        //
 
-        private string _filepath;
+        private readonly IStreamDownloader _streamDownloader;
 
         public HomePageViewModel(
             INavigationService navigationService,
-            IDownloader downloader)
+            IStreamDownloader streamDownloader)
             : base(navigationService)
         {
-            _downloader = downloader;
+            _streamDownloader = streamDownloader;
         }
 
         #region -- Public properties --
@@ -42,44 +51,88 @@ namespace CovidAnalysis.ViewModels
         {
             base.Initialize(parameters);
 
-            _downloader.OnFileDownloaded += OnFileDownloaded;
-
             Title = "Home page";
-        }
-
-        public override void Destroy()
-        {
-            base.Destroy();
-
-            _downloader.OnFileDownloaded -= OnFileDownloaded;
         }
 
         #endregion
 
         #region -- Private helpers --
 
-        private Task OnDownloadCommandAsync()
+        private async Task OnDownloadCommandAsync()
         {
             IsDownloading = true;
 
-            // TODO: request permissions
-            _filepath = _downloader.DownloadFile("https://covid.ourworldindata.org/data/owid-covid-data.csv", "XF_Downloads");
+            using var stream = await _streamDownloader.DownloadStreamAsync("https://covid.ourworldindata.org/data/owid-covid-data.csv");
+            using var reader = new StreamReader(stream);
 
-            return Task.CompletedTask;
-        }
+            // unnecessary for now, but in case we'll need to see the table header
+            var headerLine = await reader.ReadLineAsync();
 
-        private void OnFileDownloaded(object sender, DownloadEventArgs e)
-        {
-            if (e.FileSaved)
+            var line = string.Empty;
+            var countryEntries = new List<LogEntryItemModel>();
+
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                var file = System.IO.File.ReadLines(_filepath).ToList();
+                var values = line.Split(',');
 
-                IsDownloading = false;
+                var yyyyMmDd = values[3].Split('-');
+                var entryDate = new DateTime(year: int.Parse(yyyyMmDd[0]), month: int.Parse(yyyyMmDd[1]), day: int.Parse(yyyyMmDd[2]));
+
+                if (!double.TryParse(values[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var currentlySick))
+                {
+                    currentlySick = 0;
+                }
+
+                if (!double.TryParse(values[5], NumberStyles.Any, CultureInfo.InvariantCulture, out var newCasesOfSickness))
+                {
+                    newCasesOfSickness = 0;
+                }
+
+                if (!double.TryParse(values[7], NumberStyles.Any, CultureInfo.InvariantCulture, out var totalDeaths))
+                {
+                    totalDeaths = 0;
+                }
+
+                if (!double.TryParse(values[8], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeathsForToday))
+                {
+                    newDeathsForToday = 0;
+                }
+
+                if (!double.TryParse(values[12], NumberStyles.Any, CultureInfo.InvariantCulture, out var newCasesSmoothedPerMillion))
+                {
+                    newCasesSmoothedPerMillion = 0d;
+                }
+
+                if (!double.TryParse(values[15], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeathsSmoothedPerMillion))
+                {
+                    newDeathsSmoothedPerMillion = 0d;
+                }
+
+                var parsedEndtry = new LogEntryItemModel
+                {
+                    IsoCode = values[0],
+                    Country = values[2],
+                    Date = entryDate,
+                    CurrentlySick = (int)currentlySick,
+                    NewCasesOfSickness = (int)newCasesOfSickness,
+                    NewCasesSmoothedPerMillion = newCasesSmoothedPerMillion,
+                    TotalDeaths = (int)totalDeaths,
+                    NewDeathsForToday = (int)newDeathsForToday,
+                    NewDeathsSmoothedPerMillion = newDeathsSmoothedPerMillion,
+                };
+
+                if (countryEntries.LastOrDefault() is LogEntryItemModel lastModel
+                    && lastModel.IsoCode != values[0])
+                {
+                    _logEntries.Add(lastModel.IsoCode, countryEntries);
+
+                    countryEntries = new List<LogEntryItemModel>();
+                }
+
+                countryEntries.Add(parsedEndtry);
             }
-            else
-            {
-                // TODO: notify via prism page dialog service
-            }
+
+            IsDownloading = false;
         }
 
         #endregion
