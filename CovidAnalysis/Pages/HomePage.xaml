@@ -9,6 +9,8 @@
         <Button Text="Download last csv"
                 Command="{Binding DownloadCommand}"/>
 
+        <Label Text="{Binding DownloadReportMessage}"/>
+
         <ActivityIndicator VerticalOptions="CenterAndExpand"
                            HorizontalOptions="CenterAndExpand"
                            IsVisible="{Binding IsDownloading}"

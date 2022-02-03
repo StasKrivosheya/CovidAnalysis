@@ -34,6 +34,7 @@
     <None Remove="sqlite-net-pcl" />
     <None Remove="Services\Repository\" />
     <None Remove="Services\LogEntryService\" />
+    <None Remove="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
@@ -45,5 +46,6 @@
     <Folder Include="Models\LogEntryItem\" />
     <Folder Include="Services\Repository\" />
     <Folder Include="Services\LogEntryService\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 </Project>
