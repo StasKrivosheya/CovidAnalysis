@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -71,35 +72,34 @@ namespace CovidAnalysis.ViewModels
             IsDownloading = true;
 
             // TODO: remove following line
-            //var st = new System.Diagnostics.Stopwatch(); st.Start();
+            var st = new System.Diagnostics.Stopwatch(); st.Start();
 
-            using var stream = await _streamDownloader.DownloadStreamAsync(Constants.CSV_DATA_SOURCE_LINK);
+            using var stream = await _streamDownloader.DownloadStreamAsync(Constants.CSV_DATA_SOURCE_LINK).ConfigureAwait(false);
             using var reader = new StreamReader(stream);
 
-            // TODO: remove following line
-            //st.Stop(); double downloadingTime = st.ElapsedMilliseconds; st.Restart();
-
             // unnecessary for now, but in case we'll need to see the table header
-            var headerLine = await reader.ReadLineAsync();
+            var headerLine = await reader.ReadLineAsync().ConfigureAwait(false);
 
             var line = string.Empty;
-            var countryEntries = new List<LogEntryItemModel>();
+            var lines = new List<string>();
 
-            while ((line = await reader.ReadLineAsync()) != null)
+            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
             {
-                countryEntries.Add(line.ToLogEntryItemModel());
+                lines.Add(line);
             }
+            
+            var countryEntries = new ConcurrentBag<LogEntryItemModel>();
+            Parallel.ForEach(lines, l =>
+            {
+                countryEntries.Add(l.ToLogEntryItemModel());
+            });
+
+            var res = await _logEntryService.InsertEntriesAsync(countryEntries).ConfigureAwait(false);
 
             // TODO: remove following line
-            //st.Stop(); double parsingTime = st.ElapsedMilliseconds; st.Restart();
-
-            var res = await _logEntryService.InsertEntriesAsync(countryEntries);
-
-            // TODO: remove following lines
-            //double dbSavingTime = st.ElapsedMilliseconds;
-            //var totalTime = (downloadingTime + parsingTime + dbSavingTime) / 1000;
-            //var allElements = await _logEntryService.GetEntriesListAsync();
-            //DownloadReportMessage = $"Your local database has {allElements.Count} elements in total. It took {totalTime}sec to process and save all the data.";
+            st.Stop();
+            DownloadReportMessage = $"You've successfully downloaded, parsed and saved locally {res} models. " +
+                $"It took only {(double)st.ElapsedMilliseconds / 1000} secs.";
 
             IsDownloading = false;
         }
