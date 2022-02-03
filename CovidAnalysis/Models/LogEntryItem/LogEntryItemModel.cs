@@ -1,39 +1,44 @@
 ﻿using System;
+using SQLite;
 
 namespace CovidAnalysis.Models.LogEntryItem
 {
-    public class LogEntryItemModel
+    [Table(Constants.COVID_ENTRIES_TABLE_NAME)]
+    public class LogEntryItemModel : IEntityBase
     {
+        [PrimaryKey, AutoIncrement, Column("_id")]
+        public int Id { get; set; }
+
         // [0]
-        public string IsoCode;
+        public string IsoCode { get; set; }
 
         // [2] | location
-        public string Country;
+        public string Country { get; set; }
 
         // [3]
-        public DateTime Date;
+        public DateTime Date { get; set; }
 
         // [4] | total_cases
         // Total confirmed cases of COVID-19
-        public int CurrentlySick;
+        public int CurrentlySick { get; set; }
 
         // [5] | new_cases
         // New confirmed cases of COVID-19
-        public int NewCasesOfSickness;
+        public int NewCasesOfSickness { get; set; }
 
         // [12]
         // New confirmed cases of COVID-19 (7-day smoothed) per 1,000,000 people
-        public double NewCasesSmoothedPerMillion;
+        public double NewCasesSmoothedPerMillion { get; set; }
 
         // [7]
-        public int TotalDeaths;
+        public int TotalDeaths { get; set; }
 
         // [8] | new_deaths
         // New deaths attributed to COVID-19
-        public int NewDeathsForToday;
+        public int NewDeathsForToday { get; set; }
 
         // [15]
         // New deaths attributed to COVID-19 (7-day smoothed) per 1,000,000 people
-        public double NewDeathsSmoothedPerMillion;
+        public double NewDeathsSmoothedPerMillion { get; set; }
     }
 }

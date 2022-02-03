@@ -1,4 +1,6 @@
 ﻿using CovidAnalysis.Pages;
+using CovidAnalysis.Services.LogEntryService;
+using CovidAnalysis.Services.Repository;
 using CovidAnalysis.Services.StreamDownloader;
 using CovidAnalysis.ViewModels;
 using Prism;
@@ -38,7 +40,9 @@ namespace CovidAnalysis
             containerRegistry.RegisterForNavigation<HomePage, HomePageViewModel>();
 
             // services
+            containerRegistry.RegisterInstance<IRepository>(Container.Resolve<Repository>());
             containerRegistry.RegisterInstance<IStreamDownloader>(Container.Resolve<StreamDownloader>());
+            containerRegistry.RegisterInstance<ILogEntryService>(Container.Resolve<LogEntryService>());
         }
     }
 }
