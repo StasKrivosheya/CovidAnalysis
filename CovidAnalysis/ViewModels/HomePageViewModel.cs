@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -16,10 +14,6 @@ namespace CovidAnalysis.ViewModels
 {
     public class HomePageViewModel : BaseViewModel
     {
-        // tmp aka storage <ISO-code, entries>
-        private Dictionary<string, List<LogEntryItemModel>> _logEntries = new Dictionary<string, List<LogEntryItemModel>>();
-        //
-
         private readonly IStreamDownloader _streamDownloader;
         private readonly ILogEntryService _logEntryService;
 
@@ -71,9 +65,6 @@ namespace CovidAnalysis.ViewModels
         {
             IsDownloading = true;
 
-            // TODO: remove following line
-            var st = new System.Diagnostics.Stopwatch(); st.Start();
-
             using var stream = await _streamDownloader.DownloadStreamAsync(Constants.CSV_DATA_SOURCE_LINK).ConfigureAwait(false);
             using var reader = new StreamReader(stream);
 
@@ -89,17 +80,14 @@ namespace CovidAnalysis.ViewModels
             }
             
             var countryEntries = new ConcurrentBag<LogEntryItemModel>();
+
             Parallel.ForEach(lines, l =>
             {
                 countryEntries.Add(l.ToLogEntryItemModel());
             });
 
-            var res = await _logEntryService.InsertEntriesAsync(countryEntries).ConfigureAwait(false);
-
-            // TODO: remove following line
-            st.Stop();
-            DownloadReportMessage = $"You've successfully downloaded, parsed and saved locally {res} models. " +
-                $"It took only {(double)st.ElapsedMilliseconds / 1000} secs.";
+            await _logEntryService.DeleteAllEnrtiesAsync().ConfigureAwait(false);
+            await _logEntryService.InsertEntriesAsync(countryEntries).ConfigureAwait(false);
 
             IsDownloading = false;
         }

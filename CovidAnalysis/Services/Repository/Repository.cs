@@ -88,6 +88,11 @@ namespace CovidAnalysis.Services.Repository
             return _database.DeleteAsync<T>(item.Id);
         }
 
+        public Task<int> DeleteAllAsync<T>() where T : IEntityBase, new()
+        {
+            return _database.DeleteAllAsync<T>();
+        }
+
         #endregion
     }
 }

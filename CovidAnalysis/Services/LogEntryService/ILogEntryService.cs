@@ -19,6 +19,7 @@ namespace CovidAnalysis.Services.LogEntryService
 
         Task<int> UpdateEntriesAsync(LogEntryItemModel entry);
 
-        Task<int> DeleteEntriesAsync(LogEntryItemModel entry);
+        Task<int> DeleteEntryAsync(LogEntryItemModel entry);
+        Task<int> DeleteAllEnrtiesAsync();
     }
 }

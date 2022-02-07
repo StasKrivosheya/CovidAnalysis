@@ -22,5 +22,6 @@ namespace CovidAnalysis.Services.Repository
         Task<int> UpdateItemAsync<T>(T item) where T : IEntityBase, new();
 
         Task<int> DeleteItemAsync<T>(T item) where T : IEntityBase, new();
+        Task<int> DeleteAllAsync<T>() where T : IEntityBase, new();
     }
 }

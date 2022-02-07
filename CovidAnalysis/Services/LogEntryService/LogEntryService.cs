@@ -55,9 +55,14 @@ namespace CovidAnalysis.Services.LogEntryService
             return _repository.UpdateItemAsync(entry);
         }
 
-        public Task<int> DeleteEntriesAsync(LogEntryItemModel entry)
+        public Task<int> DeleteEntryAsync(LogEntryItemModel entry)
         {
             return _repository.DeleteItemAsync(entry);
+        }
+
+        public Task<int> DeleteAllEnrtiesAsync()
+        {
+            return _repository.DeleteAllAsync<LogEntryItemModel>();
         }
 
         #endregion
