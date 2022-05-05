@@ -19,9 +19,14 @@ namespace CovidAnalysis.Extensions
             var yyyyMmDd = values[3].Split('-');
             var entryDate = new DateTime(year: int.Parse(yyyyMmDd[0]), month: int.Parse(yyyyMmDd[1]), day: int.Parse(yyyyMmDd[2]));
 
-            if (!double.TryParse(values[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var currentlySick))
+            if (!double.TryParse(values[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var totalCasesOfSickness))
             {
-                currentlySick = 0;
+                totalCasesOfSickness = 0;
+            }
+
+            if (!double.TryParse(values[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var totalCasesOfSicknessPerMillion))
+            {
+                totalCasesOfSicknessPerMillion = 0;
             }
 
             if (!double.TryParse(values[5], NumberStyles.Any, CultureInfo.InvariantCulture, out var newCasesOfSickness))
@@ -29,24 +34,44 @@ namespace CovidAnalysis.Extensions
                 newCasesOfSickness = 0;
             }
 
+            if (!double.TryParse(values[11], NumberStyles.Any, CultureInfo.InvariantCulture, out var newCasesOfSicknessPerMillion))
+            {
+                newCasesOfSicknessPerMillion = 0;
+            }
+
             if (!double.TryParse(values[7], NumberStyles.Any, CultureInfo.InvariantCulture, out var totalDeaths))
             {
                 totalDeaths = 0;
             }
 
-            if (!double.TryParse(values[8], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeathsForToday))
+            if (!double.TryParse(values[13], NumberStyles.Any, CultureInfo.InvariantCulture, out var totalDeathsPerMillion))
             {
-                newDeathsForToday = 0;
+                totalDeathsPerMillion = 0;
             }
 
-            if (!double.TryParse(values[12], NumberStyles.Any, CultureInfo.InvariantCulture, out var newCasesSmoothedPerMillion))
+            if (!double.TryParse(values[8], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeaths))
             {
-                newCasesSmoothedPerMillion = 0d;
+                newDeaths = 0;
             }
 
-            if (!double.TryParse(values[15], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeathsSmoothedPerMillion))
+            if (!double.TryParse(values[14], NumberStyles.Any, CultureInfo.InvariantCulture, out var newDeathsPerMillion))
             {
-                newDeathsSmoothedPerMillion = 0d;
+                newDeathsPerMillion = 0;
+            }
+
+            if (!double.TryParse(values[35], NumberStyles.Any, CultureInfo.InvariantCulture, out var peopleVaccinated))
+            {
+                peopleVaccinated = 0;
+            }
+
+            if (!double.TryParse(values[41], NumberStyles.Any, CultureInfo.InvariantCulture, out var peopleVaccinatedPerHundred))
+            {
+                peopleVaccinatedPerHundred = 0;
+            }
+
+            if (!double.TryParse(values[46], NumberStyles.Any, CultureInfo.InvariantCulture, out var newPeopleVaccinatedSmoothedPerHundred))
+            {
+                newPeopleVaccinatedSmoothedPerHundred = 0;
             }
 
             var parsedEndtry = new LogEntryItemModel
@@ -54,12 +79,17 @@ namespace CovidAnalysis.Extensions
                 IsoCode = values[0],
                 Country = values[2],
                 Date = entryDate,
-                CurrentlySick = (int)currentlySick,
-                NewCasesOfSickness = (int)newCasesOfSickness,
-                NewCasesSmoothedPerMillion = newCasesSmoothedPerMillion,
-                TotalDeaths = (int)totalDeaths,
-                NewDeathsForToday = (int)newDeathsForToday,
-                NewDeathsSmoothedPerMillion = newDeathsSmoothedPerMillion,
+                TotalCasesOfSickness = totalCasesOfSickness,
+                TotalCasesOfSicknessPerMillion = totalCasesOfSicknessPerMillion,
+                NewCasesOfSickness = newCasesOfSickness,
+                NewCasesOfSicknessPerMillion = newCasesOfSicknessPerMillion,
+                TotalDeaths = totalDeaths,
+                TotalDeathsPerMillion = totalDeathsPerMillion,
+                NewDeaths = newDeaths,
+                NewDeathsPerMillion = newDeathsPerMillion,
+                PeopleVaccinated = peopleVaccinated,
+                PeopleVaccinatedPerHundred = peopleVaccinatedPerHundred,
+                NewPeopleVaccinatedSmoothedPerHundred = newPeopleVaccinatedSmoothedPerHundred,
             };
 
             return parsedEndtry;
