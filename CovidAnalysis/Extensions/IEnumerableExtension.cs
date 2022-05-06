@@ -7,6 +7,7 @@ namespace CovidAnalysis.Extensions
     {
         /// <summary>
         /// Smoothing Data with Moving Averages
+        /// <see cref="https://www.dallasfed.org/research/basics/moving.aspx"/>
         /// </summary>
         /// <param name="src"></param>
         /// <param name="smoothingInterval">The amount of values to take into account while smoothing</param>

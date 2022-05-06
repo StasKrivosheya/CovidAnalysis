@@ -1,20 +1,30 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
              x:Class="CovidAnalysis.Pages.HomePage"
+             ios:Page.UseSafeArea="true"
              Title="{Binding Title}">
 
-    <StackLayout>
+    <ContentPage.ToolbarItems>
 
-        <Button Text="Download last csv"
-                Command="{Binding DownloadCommand}"/>
+        <ToolbarItem Text="Get last data"
+                     Command="{Binding DownloadCommand}" />
 
-        <Label Text="{Binding DownloadReportMessage}"/>
+    </ContentPage.ToolbarItems>
+
+    <StackLayout Padding="10">
 
         <ActivityIndicator VerticalOptions="CenterAndExpand"
                            HorizontalOptions="CenterAndExpand"
                            IsVisible="{Binding IsDownloading}"
                            IsRunning="{Binding IsDownloading}"/>
+
+        <oxy:PlotView Model="{Binding FirstChartPlotModel}"
+                      VerticalOptions="FillAndExpand"
+                      HorizontalOptions="FillAndExpand"
+                      Margin="0, 0, 0, 10"/>
 
     </StackLayout>
     
