@@ -24,6 +24,7 @@
     <PackageReference Include="Xamarin.Forms.InputKit" Version="3.7.2" />
     <PackageReference Include="Rg.Plugins.Popup" Version="2.1.0" />
     <PackageReference Include="Prism.Plugin.Popups" Version="8.0.76" />
+    <PackageReference Include="Sharpnado.Tabs" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Prism.Unity.Forms" />
@@ -46,6 +47,9 @@
     <None Remove="Prism.Plugin.Popups" />
     <None Remove="Models\CountryItem\" />
     <None Remove="Services\CountryService\" />
+    <None Remove="Sharpnado.Tabs" />
+    <None Remove="Views\" />
+    <None Remove="Views\Tabs\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
@@ -60,5 +64,7 @@
     <Folder Include="Extensions\" />
     <Folder Include="Models\CountryItem\" />
     <Folder Include="Services\CountryService\" />
+    <Folder Include="Views\" />
+    <Folder Include="Views\Tabs\" />
   </ItemGroup>
 </Project>

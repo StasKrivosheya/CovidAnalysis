@@ -24,6 +24,7 @@ namespace CovidAnalysis.iOS
             global::Xamarin.Forms.Forms.Init();
             OxyPlot.Xamarin.Forms.Platform.iOS.PlotViewRenderer.Init();
             Plugin.InputKit.Platforms.iOS.Config.Init();
+            Sharpnado.Tabs.iOS.Preserver.Preserve();
 
             LoadApplication(new App(new iOSInitializer()));
 

@@ -20,6 +20,9 @@ namespace CovidAnalysis
         {
             InitializeComponent();
 
+            Sharpnado.Tabs.Initializer.Initialize(false, false);
+            Sharpnado.Shades.Initializer.Initialize(loggerEnable: false);
+
             await NavigationService.NavigateAsync($"{nameof(NavigationPage)}/{nameof(HomePage)}");
         }
 
