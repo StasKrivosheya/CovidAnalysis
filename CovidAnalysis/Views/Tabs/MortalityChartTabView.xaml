@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
+             xmlns:input="clr-namespace:Plugin.InputKit.Shared.Controls;assembly=Plugin.InputKit"
+             x:Class="CovidAnalysis.Views.Tabs.MortalityChartTabView">
+
+    <Grid RowDefinitions="Auto, *"
+          Padding="10">
+
+        <StackLayout Grid.Row="0"
+                     Orientation="Horizontal"
+                     Spacing="25">
+
+            <Frame Padding="10"
+                   Margin="52, 0, 0, 0"
+                   CornerRadius="10"
+                   HasShadow="False"
+                   BorderColor="Black"
+                   HorizontalOptions="Start">
+
+                <Label Text="{Binding CountryPickerText}"
+                       VerticalTextAlignment="Center"/>
+
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectCountryCommand}" />
+                </Frame.GestureRecognizers>
+
+            </Frame>
+
+            <ActivityIndicator HorizontalOptions="CenterAndExpand"
+                               IsVisible="{Binding IsDownloading}"
+                               IsRunning="{Binding IsDownloading}" />
+
+            <input:CheckBox IsChecked="{Binding ShouldShowRawData}"
+                            Text="Show raw data"
+                            Type="Material"
+                            HorizontalOptions="EndAndExpand" />
+
+            <input:CheckBox IsChecked="{Binding ShouldShowSmoothedData}"
+                            Text="Show smoothed data"
+                            Type="Material" />
+
+        </StackLayout>
+
+        <oxy:PlotView Grid.Row="1"
+                      Model="{Binding MortalityChartPlotModel}"
+                      VerticalOptions="FillAndExpand"
+                      HorizontalOptions="FillAndExpand"
+                      Margin="0, 0, 0, 10"/>
+
+    </Grid>
+
+</ContentView>

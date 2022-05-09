@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
              xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
-             xmlns:input="clr-namespace:Plugin.InputKit.Shared.Controls;assembly=Plugin.InputKit"
+             xmlns:tabs="clr-namespace:Sharpnado.Tabs;assembly=Sharpnado.Tabs"
+             xmlns:tabsViews="clr-namespace:CovidAnalysis.Views.Tabs"
              x:Class="CovidAnalysis.Pages.HomePage"
              ios:Page.UseSafeArea="true"
              Title="{Binding Title}">
@@ -15,47 +15,49 @@
 
     </ContentPage.ToolbarItems>
 
-    <StackLayout Padding="10">
+    <ContentPage.Resources>
 
-        <StackLayout Orientation="Horizontal"
-                     Spacing="25">
+        <ResourceDictionary>
 
-            <Frame Padding="10"
-                   Margin="52, 0, 0, 0"
-                   CornerRadius="10"
-                   HasShadow="False"
-                   BorderColor="Black"
-                   HorizontalOptions="Start">
+            <Style x:Key="TabStyle" TargetType="tabs:UnderlinedTabItem">
+                <Setter Property="SelectedTabColor" Value="Black" />
+                <Setter Property="LabelSize" Value="14" />
+                <Setter Property="UnselectedLabelColor" Value="Gray" />
+            </Style>
 
-                <Label Text="{Binding CountryPickerText}"
-                       VerticalTextAlignment="Center"/>
+        </ResourceDictionary>
 
-                <Frame.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SelectCountryCommand}" />
-                </Frame.GestureRecognizers>
+    </ContentPage.Resources>
 
-            </Frame>
+    <Grid RowDefinitions="50, *">
 
-            <ActivityIndicator HorizontalOptions="CenterAndExpand"
-                               IsVisible="{Binding IsDownloading}"
-                               IsRunning="{Binding IsDownloading}" />
+        <tabs:TabHostView Grid.Row="0"
+                          SelectedIndex="{Binding Source={x:Reference Switcher}, Path=SelectedIndex, Mode=TwoWay}">
 
-            <input:CheckBox IsChecked="{Binding ShouldShowRawData}"
-                            Text="Show raw data"
-                            Type="Material"
-                            HorizontalOptions="EndAndExpand" />
+            <tabs:TabHostView.Tabs>
+                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Mortality Chart" />
+                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Sickness Comparison Chart" />
+                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Coming Soon..." />
+            </tabs:TabHostView.Tabs>
 
-            <input:CheckBox IsChecked="{Binding ShouldShowSmoothedData}"
-                            Text="Show smoothed data"
-                            Type="Material" />
+        </tabs:TabHostView>
 
-        </StackLayout>
+        <tabs:ViewSwitcher x:Name="Switcher"
+                           Grid.Row="1"
+                           SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}">
 
-        <oxy:PlotView Model="{Binding MortalityChartPlotModel}"
-                      VerticalOptions="FillAndExpand"
-                      HorizontalOptions="FillAndExpand"
-                      Margin="0, 0, 0, 10"/>
+            <tabsViews:MortalityChartTabView />
 
-    </StackLayout>
+            <ContentView>
+                <Label Text="Hello2"/>
+            </ContentView>
+
+            <ContentView>
+                <Label Text="Hello3"/>
+            </ContentView>
+
+        </tabs:ViewSwitcher>
+
+    </Grid>
     
 </ContentPage>

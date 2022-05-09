@@ -48,6 +48,13 @@ namespace CovidAnalysis.ViewModels
 
         #region -- Public properties --
 
+        private int _selectedViewModelIndex;
+        public int SelectedViewModelIndex
+        {
+            get => _selectedViewModelIndex;
+            set => SetProperty(ref _selectedViewModelIndex, value);
+        }
+
         private bool _isDownloading;
         public bool IsDownloading
         {
@@ -110,8 +117,9 @@ namespace CovidAnalysis.ViewModels
             if (parameters.TryGetValue(Constants.Navigation.SELECTED_COUNTRY, out CountryItemModel country))
             {
                 CountryPickerText = country.CountryName;
+                _selectedCountry = country;
 
-                await DispayMortalityAsync(country, ShouldShowRawData, ShouldShowSmoothedData);
+                await DispayMortalityAsync(_selectedCountry, ShouldShowRawData, ShouldShowSmoothedData);
             }
         }
 
