@@ -20,14 +20,14 @@ namespace CovidAnalysis.Extensions
 
             var result = new double[N];
 
-            // prepopulating values that don't have necessary amount of neigbors to calculate its Moving Averages
+            // prepopulating values that don't have the necessary amount of neighbors to calculate their Moving Averages
             for (int i = 0; i < halfInterval; i++)
             {
                 result[i] = sourceList[i];
                 result[N - i - 1] = sourceList[N - i - 1];
             }
 
-            // Smoothing rest Data with Moving Averages
+            // Smoothing the rest data with Moving Averages
             for (int i = halfInterval; i < N - halfInterval; i++)
             {
                 var sum = sourceList.Skip(i + halfInterval).Take(smoothingInterval).Sum();

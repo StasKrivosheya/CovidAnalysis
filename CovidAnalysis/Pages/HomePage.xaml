@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:oxy="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
              xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+             xmlns:input="clr-namespace:Plugin.InputKit.Shared.Controls;assembly=Plugin.InputKit"
              x:Class="CovidAnalysis.Pages.HomePage"
              ios:Page.UseSafeArea="true"
              Title="{Binding Title}">
@@ -16,12 +17,41 @@
 
     <StackLayout Padding="10">
 
-        <ActivityIndicator VerticalOptions="CenterAndExpand"
-                           HorizontalOptions="CenterAndExpand"
-                           IsVisible="{Binding IsDownloading}"
-                           IsRunning="{Binding IsDownloading}"/>
+        <StackLayout Orientation="Horizontal"
+                     Spacing="25">
 
-        <oxy:PlotView Model="{Binding FirstChartPlotModel}"
+            <Frame Padding="10"
+                   Margin="52, 0, 0, 0"
+                   CornerRadius="10"
+                   HasShadow="False"
+                   BorderColor="Black"
+                   HorizontalOptions="Start">
+
+                <Label Text="{Binding CountryPickerText}"
+                       VerticalTextAlignment="Center"/>
+
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectCountryCommand}" />
+                </Frame.GestureRecognizers>
+
+            </Frame>
+
+            <ActivityIndicator HorizontalOptions="CenterAndExpand"
+                               IsVisible="{Binding IsDownloading}"
+                               IsRunning="{Binding IsDownloading}" />
+
+            <input:CheckBox IsChecked="{Binding ShouldShowRawData}"
+                            Text="Show raw data"
+                            Type="Material"
+                            HorizontalOptions="EndAndExpand" />
+
+            <input:CheckBox IsChecked="{Binding ShouldShowSmoothedData}"
+                            Text="Show smoothed data"
+                            Type="Material" />
+
+        </StackLayout>
+
+        <oxy:PlotView Model="{Binding MortalityChartPlotModel}"
                       VerticalOptions="FillAndExpand"
                       HorizontalOptions="FillAndExpand"
                       Margin="0, 0, 0, 10"/>

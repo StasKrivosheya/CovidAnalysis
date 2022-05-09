@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
+using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Models.LogEntryItem;
+using CovidAnalysis.Pages;
+using CovidAnalysis.Services.CountryService;
 using CovidAnalysis.Services.LogEntryService;
 using CovidAnalysis.Services.StreamDownloader;
 using OxyPlot;
@@ -23,17 +27,22 @@ namespace CovidAnalysis.ViewModels
     {
         private readonly IStreamDownloader _streamDownloader;
         private readonly ILogEntryService _logEntryService;
+        private readonly ICountryService _countryService;
         private readonly IPageDialogService _pageDialogService;
+
+        private CountryItemModel _selectedCountry;
 
         public HomePageViewModel(
             INavigationService navigationService,
             IStreamDownloader streamDownloader,
             ILogEntryService logEntryService,
+            ICountryService countryService,
             IPageDialogService pageDialogService)
             : base(navigationService)
         {
             _streamDownloader = streamDownloader;
             _logEntryService = logEntryService;
+            _countryService = countryService;
             _pageDialogService = pageDialogService;
         }
 
@@ -46,15 +55,39 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _isDownloading, value);
         }
 
-        private PlotModel _firstChartPlotModel;
-        public PlotModel FirstChartPlotModel
+        private PlotModel _mortalityChartPlotModel;
+        public PlotModel MortalityChartPlotModel
         {
-            get => _firstChartPlotModel;
-            set => SetProperty(ref _firstChartPlotModel, value);
+            get => _mortalityChartPlotModel;
+            set => SetProperty(ref _mortalityChartPlotModel, value);
+        }
+
+        private string _countryPickerText = "Choose country ▼";
+        public string CountryPickerText
+        {
+            get => _countryPickerText;
+            set => SetProperty(ref _countryPickerText, value);
+        }
+
+        private bool _shouldShowRawData = true;
+        public bool ShouldShowRawData
+        {
+            get => _shouldShowRawData;
+            set => SetProperty(ref _shouldShowRawData, value);
+        }
+
+        private bool _shouldShowSmoothedData = false;
+        public bool ShouldShowSmoothedData
+        {
+            get => _shouldShowSmoothedData;
+            set => SetProperty(ref _shouldShowSmoothedData, value);
         }
 
         private ICommand _downloadCommand;
         public ICommand DownloadCommand => _downloadCommand ??= new DelegateCommand(async () => await OnDownloadCommandAsync());
+
+        private ICommand _selectCountryCommand;
+        public ICommand SelectCountryCommand => _selectCountryCommand ??= new DelegateCommand(async () => await OnSelectCountryCommandAsync());
 
         #endregion
 
@@ -66,12 +99,47 @@ namespace CovidAnalysis.ViewModels
 
             Title = "Home page";
 
-            await DispayMortalityAsync("UKR");
+            _selectedCountry = await _countryService.GetCountryAsync(c => c.IsoCode == Constants.DEFAULT_COUNTRY_ISO);
+            await DispayMortalityAsync(_selectedCountry, ShouldShowRawData, ShouldShowSmoothedData);
+        }
+
+        public override async void OnNavigatedTo(INavigationParameters parameters)
+        {
+            base.OnNavigatedTo(parameters);
+
+            if (parameters.TryGetValue(Constants.Navigation.SELECTED_COUNTRY, out CountryItemModel country))
+            {
+                CountryPickerText = country.CountryName;
+
+                await DispayMortalityAsync(country, ShouldShowRawData, ShouldShowSmoothedData);
+            }
+        }
+
+        protected override async void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+
+            if (args.PropertyName is nameof(ShouldShowRawData) or nameof(ShouldShowSmoothedData))
+            {
+                await DispayMortalityAsync(_selectedCountry, ShouldShowRawData, ShouldShowSmoothedData);
+            }
         }
 
         #endregion
 
         #region -- Private helpers --
+
+        private async Task OnSelectCountryCommandAsync()
+        {
+            var countries = await _countryService.GetCountriesListAsync();
+
+            var parameters = new NavigationParameters
+            {
+                {Constants.Navigation.COLLECTION_FOR_SELECTION, countries },
+            };
+
+            await NavigationService.NavigateAsync(nameof(SelectOnePopupPage), parameters);
+        }
 
         private async Task OnDownloadCommandAsync()
         {
@@ -92,18 +160,36 @@ namespace CovidAnalysis.ViewModels
             }
             
             var countryEntries = new ConcurrentBag<LogEntryItemModel>();
-            // <ISO-code, FullName>
-            var countries = new ConcurrentDictionary<string, string>();
+            var newCountries = new ConcurrentDictionary<string, CountryItemModel>();
 
             Parallel.ForEach(lines, l =>
             {
                 var entry = l.ToLogEntryItemModel();
                 countryEntries.Add(entry);
-                countries.TryAdd(entry.IsoCode, entry.Country);
+                newCountries.TryAdd(
+                    entry.IsoCode,
+                    new CountryItemModel
+                    {
+                        IsoCode = entry.IsoCode,
+                        CountryName = entry.Country,
+                    });
             });
 
             await _logEntryService.DeleteAllEnrtiesAsync().ConfigureAwait(false);
             var insertedCount = await _logEntryService.InsertEntriesAsync(countryEntries).ConfigureAwait(false);
+
+            var oldCountries = await _countryService.GetCountriesListAsync();
+
+            if (oldCountries is null
+                || oldCountries.Count is 0)
+            {
+                await _countryService.InsertEntriesAsync(newCountries.Select(c => c.Value)).ConfigureAwait(false);
+            }
+            else if (oldCountries.Count != newCountries.Count)
+            {
+                await _countryService.DeleteAllCountriesAsync().ConfigureAwait(false);
+                await _countryService.InsertEntriesAsync(newCountries.Select(c => c.Value)).ConfigureAwait(false);
+            }
 
             IsDownloading = false;
 
@@ -113,12 +199,15 @@ namespace CovidAnalysis.ViewModels
                 await _pageDialogService.DisplayAlertAsync("Success", downloadReportMessage, "Ok");
             });
 
-            await DispayMortalityAsync("UKR");
+            _selectedCountry = await _countryService.GetCountryAsync(c => c.IsoCode == Constants.DEFAULT_COUNTRY_ISO);
+            await DispayMortalityAsync(_selectedCountry, ShouldShowRawData, ShouldShowSmoothedData);
         }
 
-        private async Task DispayMortalityAsync(string countryIsoCode)
+        private async Task DispayMortalityAsync(CountryItemModel country, bool shouldShowRawData, bool shouldShowSmoothedData)
         {
-            var entriesToDisplay = await _logEntryService.GetEntriesListAsync(e => e.IsoCode == countryIsoCode);
+            if (country is null) return;
+
+            var entriesToDisplay = await _logEntryService.GetEntriesListAsync(e => e.IsoCode == country.IsoCode);
 
             if (entriesToDisplay is null
                 || entriesToDisplay.Count is 0)
@@ -126,7 +215,7 @@ namespace CovidAnalysis.ViewModels
                 Device.BeginInvokeOnMainThread(async () =>
                 {
                     await _pageDialogService.DisplayAlertAsync("No data",
-                        $"You either don't have any data yet, or ISO code {countryIsoCode} is wrong.\nTry getting last data.",
+                        $"You either don't have any data yet, or ISO code {country.IsoCode} is wrong.\nTry getting last data.",
                         "Ok");
                 });
 
@@ -157,40 +246,46 @@ namespace CovidAnalysis.ViewModels
             };
             plotModel.Axes.Add(yAxis);
 
-            LineSeries rawDataLineSeries = new()
+            if (shouldShowRawData)
             {
-                MarkerFill = OxyColor.Parse("#0000FF"),
-                Title = $"New death per million, {countryIsoCode}",
-            };
+                LineSeries rawDataLineSeries = new()
+                {
+                    Color = OxyColor.Parse("#5EA701"),
+                    Title = $"New death per million, {country.IsoCode}",
+                };
 
-            foreach (var entry in entriesToDisplay)
-            {
-                rawDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
+                foreach (var entry in entriesToDisplay)
+                {
+                    rawDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
+                }
+
+                plotModel.Series.Add(rawDataLineSeries);
             }
 
-            plotModel.Series.Add(rawDataLineSeries);
-
-            LineSeries smoothedDataLineSeries = new()
+            if (shouldShowSmoothedData)
             {
-                MarkerFill = OxyColor.Parse("#FF0000"),
-                Title = $"New death per million SMOOTHED, {countryIsoCode}",
-            };
+                LineSeries smoothedDataLineSeries = new()
+                {
+                    Color = OxyColor.Parse("#D39D00"),
+                    Title = $"New death per million SMOOTHED, {country.IsoCode}",
+                };
 
-            var newDeathsCasesSmoothed = entriesToDisplay.Select(u => u.NewDeathsPerMillion).GetSmoothed(7).ToList();
+                var newDeathsCasesSmoothed = entriesToDisplay.Select(u => u.NewDeathsPerMillion).GetSmoothed(7).ToList();
 
-            for (int i = 0; i < entriesToDisplay.Count - 1; i++)
-            {
-                entriesToDisplay[i].NewDeathsPerMillion = newDeathsCasesSmoothed[i];
+                for (int i = 0; i < entriesToDisplay.Count - 1; i++)
+                {
+                    entriesToDisplay[i].NewDeathsPerMillion = newDeathsCasesSmoothed[i];
+                }
+
+                foreach (var entry in entriesToDisplay.OrderBy(e => e.Date))
+                {
+                    smoothedDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
+                }
+
+                plotModel.Series.Add(smoothedDataLineSeries);
             }
 
-            foreach (var entry in entriesToDisplay.OrderBy(e => e.Date))
-            {
-                smoothedDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
-            }
-
-            plotModel.Series.Add(smoothedDataLineSeries);
-
-            FirstChartPlotModel = plotModel;
+            MortalityChartPlotModel = plotModel;
         }
 
         #endregion
