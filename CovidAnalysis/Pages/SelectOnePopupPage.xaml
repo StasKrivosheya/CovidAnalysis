@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+                 xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                 x:Class="CovidAnalysis.Pages.SelectOnePopupPage">
+
+    <pages:PopupPage.Animation>
+
+        <animations:ScaleAnimation 
+            PositionIn="Top"
+            PositionOut="Top"
+            ScaleIn="1.2"
+            ScaleOut="0.8"
+            DurationIn="200"
+            DurationOut="300"
+            EasingIn="SinOut"
+            EasingOut="SinIn"
+            HasBackgroundAnimation="True"/>
+
+    </pages:PopupPage.Animation>
+
+    <Frame VerticalOptions="Center"
+           HorizontalOptions="Center"
+           CornerRadius="10"
+           HeightRequest="500"
+           WidthRequest="400"
+           Padding="20"
+           Margin="20"
+           HasShadow="False">
+
+        <StackLayout Spacing="15">
+
+            <Label Text="Choose country"
+                   FontSize="Title" />
+
+            <Entry Text="{Binding SearchText}"
+                   Placeholder="Country name or ISO code" />
+
+            <CollectionView ItemsSource="{Binding ShowableItems}"
+                            SelectedItem="{Binding SelectedCountry}"
+                            SelectionMode="Single">
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <StackLayout Padding="5">
+
+                            <Label Text="{Binding .}"
+                                   TextColor="Black"/>
+
+                        </StackLayout>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </StackLayout>
+
+    </Frame>
+
+</pages:PopupPage>
