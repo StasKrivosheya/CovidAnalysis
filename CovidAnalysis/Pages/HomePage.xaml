@@ -47,12 +47,12 @@
                            SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}"
                            IsVisible="{Binding IsDownloading, Converter={StaticResource invertedBoolConverter}}">
 
-            <tabsViews:MortalityChartTabView />
+            <tabsViews:MortalityChartTabView BindingContext="{Binding MortalityChartTabViewModel}" />
 
             <tabsViews:IncidenceChartTabView />
 
             <ContentView>
-                <Label Text="Hello3"/>
+                <Label Text="Here will be smth about Dynamic Time Warping algorithm or smth like that."/>
             </ContentView>
 
         </tabs:ViewSwitcher>
