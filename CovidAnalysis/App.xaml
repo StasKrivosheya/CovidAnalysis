@@ -2,8 +2,15 @@
 <prism:PrismApplication xmlns="http://xamarin.com/schemas/2014/forms"
                   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                   xmlns:prism="clr-namespace:Prism.Unity;assembly=Prism.Unity.Forms"
+                  xmlns:resources="clr-namespace:CovidAnalysis.Recources"
                   x:Class="CovidAnalysis.App">
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
 
+                <resources:DefaultResources />
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </prism:PrismApplication>

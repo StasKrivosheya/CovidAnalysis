@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+                    xmlns:input="clr-namespace:Plugin.InputKit.Shared.Controls;assembly=Plugin.InputKit"
+                    x:Class="CovidAnalysis.Recources.DefaultResources">
+
+    <!-- Styles -->
+    <Style TargetType="input:CheckBox">
+        <Setter Property="Color" Value="#007AFF" />
+        <Setter Property="IconColor" Value="White" />
+    </Style>
+
+    <!--Converters-->
+    <xct:InvertedBoolConverter x:Key="invertedBoolConverter" />
+
+</ResourceDictionary>
