@@ -13,7 +13,6 @@
                      Spacing="25">
 
             <Frame Padding="10"
-                   Margin="52, 0, 0, 0"
                    CornerRadius="10"
                    HasShadow="False"
                    BorderColor="Black"
@@ -27,10 +26,6 @@
                 </Frame.GestureRecognizers>
 
             </Frame>
-
-            <ActivityIndicator HorizontalOptions="CenterAndExpand"
-                               IsVisible="{Binding IsDownloading}"
-                               IsRunning="{Binding IsDownloading}" />
 
             <input:CheckBox IsChecked="{Binding ShouldShowRawData}"
                             Text="Show raw data"

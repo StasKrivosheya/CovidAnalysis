@@ -44,19 +44,22 @@
 
         <tabs:ViewSwitcher x:Name="Switcher"
                            Grid.Row="1"
-                           SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}">
+                           SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}"
+                           IsVisible="{Binding IsDownloading, Converter={StaticResource invertedBoolConverter}}">
 
             <tabsViews:MortalityChartTabView />
 
-            <ContentView>
-                <Label Text="Hello2"/>
-            </ContentView>
+            <tabsViews:IncidenceChartTabView />
 
             <ContentView>
                 <Label Text="Hello3"/>
             </ContentView>
 
         </tabs:ViewSwitcher>
+
+        <ActivityIndicator Grid.Row="1"
+                           IsVisible="{Binding IsDownloading}"
+                           IsRunning="{Binding IsDownloading}"/>
 
     </Grid>
     
