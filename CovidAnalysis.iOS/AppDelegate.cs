@@ -20,8 +20,10 @@ namespace CovidAnalysis.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
+            Rg.Plugins.Popup.Popup.Init();
             global::Xamarin.Forms.Forms.Init();
             OxyPlot.Xamarin.Forms.Platform.iOS.PlotViewRenderer.Init();
+            Plugin.InputKit.Platforms.iOS.Config.Init();
 
             LoadApplication(new App(new iOSInitializer()));
 

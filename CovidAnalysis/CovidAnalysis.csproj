@@ -21,6 +21,9 @@
     <PackageReference Include="Prism.Unity.Forms" Version="8.1.97" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="OxyPlot.Xamarin.Forms" Version="1.0.0" />
+    <PackageReference Include="Xamarin.Forms.InputKit" Version="3.7.2" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="2.1.0" />
+    <PackageReference Include="Prism.Plugin.Popups" Version="8.0.76" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Prism.Unity.Forms" />
@@ -37,6 +40,12 @@
     <None Remove="Services\LogEntryService\" />
     <None Remove="Extensions\" />
     <None Remove="OxyPlot.Xamarin.Forms" />
+    <None Remove="Xamarin.Forms.InputKit" />
+    <None Remove="XamForms.Autocomplete" />
+    <None Remove="Rg.Plugins.Popup" />
+    <None Remove="Prism.Plugin.Popups" />
+    <None Remove="Models\CountryItem\" />
+    <None Remove="Services\CountryService\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
@@ -49,5 +58,7 @@
     <Folder Include="Services\Repository\" />
     <Folder Include="Services\LogEntryService\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Models\CountryItem\" />
+    <Folder Include="Services\CountryService\" />
   </ItemGroup>
 </Project>
