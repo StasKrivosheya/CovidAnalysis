@@ -38,13 +38,6 @@ namespace CovidAnalysis.ViewModels.Tabs
 
         #region -- Public properties --
 
-        private string _countryPickerText = "Choose country ▼";
-        public string CountryPickerText
-        {
-            get => _countryPickerText;
-            set => SetProperty(ref _countryPickerText, value);
-        }
-
         private bool _shouldShowRawData = true;
         public bool ShouldShowRawData
         {
@@ -52,7 +45,7 @@ namespace CovidAnalysis.ViewModels.Tabs
             set => SetProperty(ref _shouldShowRawData, value);
         }
 
-        private bool _shouldShowSmoothedData = false;
+        private bool _shouldShowSmoothedData;
         public bool ShouldShowSmoothedData
         {
             get => _shouldShowSmoothedData;
@@ -94,7 +87,6 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             if (parameters.TryGetValue(Constants.Navigation.SELECTED_COUNTRY, out CountryItemModel country))
             {
-                CountryPickerText = country.CountryName;
                 SelectedCountry = country;
 
                 await DispayMortalityAsync(SelectedCountry);

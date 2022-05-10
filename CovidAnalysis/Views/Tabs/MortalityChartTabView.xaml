@@ -18,8 +18,9 @@
                    BorderColor="Black"
                    HorizontalOptions="Start">
 
-                <Label Text="{Binding CountryPickerText}"
-                       VerticalTextAlignment="Center"/>
+                <Label Text="{Binding SelectedCountry.CountryName,
+                              StringFormat='{0}  ▼'}"
+                       VerticalTextAlignment="Center" />
 
                 <Frame.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding SelectCountryCommand}" />

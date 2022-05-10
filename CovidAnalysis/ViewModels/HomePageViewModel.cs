@@ -39,6 +39,7 @@ namespace CovidAnalysis.ViewModels
             _pageDialogService = pageDialogService;
 
             MortalityChartTabViewModel = new MortalityChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
+            IncidenceChartTabViewModel = new IncidenceChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
         }
 
         #region -- Public properties --
@@ -64,6 +65,13 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _mortalityChartTabViewModel, value);
         }
 
+        private IncidenceChartTabViewModel _incidenceChartTabViewModel;
+        public IncidenceChartTabViewModel IncidenceChartTabViewModel
+        {
+            get => _incidenceChartTabViewModel;
+            set => SetProperty(ref _incidenceChartTabViewModel, value);
+        }
+
         private ICommand _downloadCommand;
         public ICommand DownloadCommand => _downloadCommand ??= new DelegateCommand(async () => await OnDownloadCommandAsync());
 
@@ -78,13 +86,21 @@ namespace CovidAnalysis.ViewModels
             Title = "Home page";
 
             MortalityChartTabViewModel.Initialize(parameters);
+            IncidenceChartTabViewModel.Initialize(parameters);
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
         {
             base.OnNavigatedTo(parameters);
 
-            MortalityChartTabViewModel.OnNavigatedTo(parameters);
+            if (SelectedViewModelIndex is 0)
+            {
+                MortalityChartTabViewModel.OnNavigatedTo(parameters);
+            }
+            else if (SelectedViewModelIndex is 1)
+            {
+                IncidenceChartTabViewModel.OnNavigatedTo(parameters);
+            }
         }
 
         #endregion

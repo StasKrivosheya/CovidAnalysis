@@ -49,10 +49,10 @@
 
             <tabsViews:MortalityChartTabView BindingContext="{Binding MortalityChartTabViewModel}" />
 
-            <tabsViews:IncidenceChartTabView />
+            <tabsViews:IncidenceChartTabView BindingContext="{Binding IncidenceChartTabViewModel}" />
 
             <ContentView>
-                <Label Text="Here will be smth about Dynamic Time Warping algorithm or smth like that."/>
+                <Label Text="Here will be smth about Dynamic Time Warping algorithm or smth like that." />
             </ContentView>
 
         </tabs:ViewSwitcher>
