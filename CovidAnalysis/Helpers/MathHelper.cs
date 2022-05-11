@@ -14,6 +14,9 @@ namespace CovidAnalysis.Helpers
 
             var transformationsMatrix = GetPrepopulatedTransformationsMatrix(n + 1, m + 1);
 
+            var tracebackMatrix = new Tuple<int, int>[n + 1, m + 1];
+
+            // calculating transformations and traceback matrices
             for (int i = 1; i <= n; i++)
             {
                 for (int j = 1; j <= m; j++)
@@ -28,6 +31,44 @@ namespace CovidAnalysis.Helpers
                     }.Min();
 
                     transformationsMatrix[i, j] = dist_i_j + penalty;
+
+                    if (penalty == transformationsMatrix[i - 1, j])
+                    {
+                        tracebackMatrix[i, j] = new Tuple<int, int>(i - 1, j);
+                    }
+                    else if (penalty == transformationsMatrix[i - 1, j - 1])
+                    {
+                        tracebackMatrix[i, j] = new Tuple<int, int>(i - 1, j - 1);
+                    }
+                    else
+                    {
+                        tracebackMatrix[i, j] = new Tuple<int, int>(i, j - 1);
+                    }
+                }
+            }
+
+            // extracting shortest path from trac–eback matrix
+            // calculating summary cost
+
+            var shortestPath = new List<Tuple<int, int>>();
+            var resultCost = 0d;
+
+            var k = n;
+            var l = m;
+            for (int i = n + m; i > 0; i--)
+            {
+                resultCost += transformationsMatrix[k, l];
+
+                shortestPath.Add(new Tuple<int, int>(k, l));
+
+                var nextElementCoordinates = tracebackMatrix[k, l];
+
+                k = nextElementCoordinates.Item1;
+                l = nextElementCoordinates.Item2;
+
+                if (k is 0 && l is 0)
+                {
+                    break;
                 }
             }
 
