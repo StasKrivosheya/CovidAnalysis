@@ -7,7 +7,7 @@ namespace CovidAnalysis.Helpers
 {
     public static class MathHelper
     {
-        public static DTWCalcResult GetTransformationsMatrix(double[] x1, double[] x2)
+        public static DTWCalcResult CalculateDtw(double[] x1, double[] x2)
         {
             var n = x1.Length;
             var m = x2.Length;

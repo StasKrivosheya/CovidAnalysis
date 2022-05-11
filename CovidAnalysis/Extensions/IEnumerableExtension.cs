@@ -14,23 +14,35 @@ namespace CovidAnalysis.Extensions
         /// <returns>Smoothed collection</returns>
         public static IEnumerable<double> GetSmoothed(this IEnumerable<double> src, int smoothingInterval)
         {
-            var sourceList = src.ToArray();
-            var N = sourceList.Length;
+            var sourceArr = src.ToArray();
+            var N = sourceArr.Length;
             var halfInterval = smoothingInterval / 2;
 
             var result = new double[N];
 
+            if (N <= smoothingInterval)
+            {
+                var avg = sourceArr.Average();
+
+                for (int i = 0; i < N; i++)
+                {
+                    result[i] = avg;
+                }
+
+                return src;
+            }
+
             // prepopulating values that don't have the necessary amount of neighbors to calculate their Moving Averages
             for (int i = 0; i < halfInterval; i++)
             {
-                result[i] = sourceList[i];
-                result[N - i - 1] = sourceList[N - i - 1];
+                result[i] = sourceArr[i];
+                result[N - i - 1] = sourceArr[N - i - 1];
             }
 
             // Smoothing the rest data with Moving Averages
             for (int i = halfInterval; i < N - halfInterval; i++)
             {
-                var sum = sourceList.Skip(i + halfInterval).Take(smoothingInterval).Sum();
+                var sum = sourceArr.Skip(i + halfInterval).Take(smoothingInterval).Sum();
                 var average = sum / smoothingInterval;
 
                 result[i] = average;
