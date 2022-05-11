@@ -55,6 +55,7 @@
     <None Remove="Xamarin.CommunityToolkit" />
     <None Remove="ViewModels\Tabs\" />
     <None Remove="Helpers\" />
+    <None Remove="Models\CalculationItems\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
@@ -74,5 +75,6 @@
     <Folder Include="Recources\" />
     <Folder Include="ViewModels\Tabs\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Models\CalculationItems\" />
   </ItemGroup>
 </Project>

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using CovidAnalysis.Models.CalculationItems;
 
 namespace CovidAnalysis.Helpers
 {
     public static class MathHelper
     {
-        public static double[,] GetTransformationsMatrix(double[] x1, double[] x2)
+        public static DTWCalcResult GetTransformationsMatrix(double[] x1, double[] x2)
         {
             var n = x1.Length;
             var m = x2.Length;
@@ -72,7 +74,43 @@ namespace CovidAnalysis.Helpers
                 }
             }
 
-            return transformationsMatrix;
+            // creating a correspondence between elements of two time series
+            var matchingElements = new List<MatchingElementsModel>();
+
+            shortestPath.Reverse();
+
+            for (int i = 0; i < n; i++)
+            {
+                // taking the coordinates of all points (from the current row) that belongs to the optimal path
+                // - 1 is needed because the shortestPath contains indices of the extended transformations matrix
+                var currentRowTuples = shortestPath.Where(coordinate => coordinate.Item1 - 1 == i).ToList();
+
+                // extracting corresponding column
+                var correspondingColumns = currentRowTuples.Select(coordinate => coordinate.Item2 - 1).ToList();
+
+                // extracting corresponding x2 values
+                var correspondingColumnsValues = new List<double>();
+                foreach (var index in correspondingColumns)
+                {
+                    correspondingColumnsValues.Add(x2[index]);
+                }
+
+                matchingElements.Add(new MatchingElementsModel
+                {
+                    X1Value = x1[i],
+                    CorrespondingX2Values = correspondingColumnsValues,
+                });
+            }
+
+            resultCost /= shortestPath.Count;
+
+            var result = new DTWCalcResult
+            {
+                Cost = resultCost,
+                MatchingElements = matchingElements
+            };
+
+            return result;
         }
 
         private static double[,] GetDistanceMatrix(double[] x1, double[] x2)
