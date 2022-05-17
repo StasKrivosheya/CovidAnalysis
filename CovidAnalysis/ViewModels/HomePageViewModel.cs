@@ -1,10 +1,12 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
+using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Models.LogEntryItem;
 using CovidAnalysis.Services.CountryService;
@@ -40,6 +42,7 @@ namespace CovidAnalysis.ViewModels
 
             MortalityChartTabViewModel = new MortalityChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
             IncidenceChartTabViewModel = new IncidenceChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
+            DtwTabViewModel = new DtwTabViewModel(navigationService, logEntryService, countryService);
         }
 
         #region -- Public properties --
@@ -72,6 +75,13 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _incidenceChartTabViewModel, value);
         }
 
+        private DtwTabViewModel _dtwTabViewModel;
+        public DtwTabViewModel DtwTabViewModel
+        {
+            get => _dtwTabViewModel;
+            set => SetProperty(ref _dtwTabViewModel, value);
+        }
+
         private ICommand _downloadCommand;
         public ICommand DownloadCommand => _downloadCommand ??= new DelegateCommand(async () => await OnDownloadCommandAsync());
 
@@ -87,6 +97,7 @@ namespace CovidAnalysis.ViewModels
 
             MortalityChartTabViewModel.Initialize(parameters);
             IncidenceChartTabViewModel.Initialize(parameters);
+            DtwTabViewModel.Initialize(parameters);
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
