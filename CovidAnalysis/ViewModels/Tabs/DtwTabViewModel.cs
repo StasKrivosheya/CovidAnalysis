@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CovidAnalysis.Extensions;
 using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
+using CovidAnalysis.Models.LogEntryItem;
 using CovidAnalysis.Services.CountryService;
 using CovidAnalysis.Services.LogEntryService;
 using Prism.Navigation;
@@ -52,8 +53,6 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             await CompareCountriesToUkraine();
 
-            // await ParallelCompareCountriesToUkraine();
-
             // TestOnSmallData();
         }
 
@@ -61,10 +60,14 @@ namespace CovidAnalysis.ViewModels.Tabs
 
         #region -- Private helpers --
 
-        // todo: optimize
         private async Task CompareCountriesToUkraine()
         {
             var countries = await _countryService.GetCountriesListAsync();
+
+            if (countries.Count < 1)
+            {
+                return;
+            }
 
             var ukrNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == "UKR"))
                                 .OrderBy(l => l.Date)
@@ -72,26 +75,26 @@ namespace CovidAnalysis.ViewModels.Tabs
                                 .GetSmoothed(7)
                                 .ToArray();
 
-            var countriesDTWComparison = new List<Tuple<CountryItemModel, double>>();
+            var tasks = countries.Select(country => PrepareItemAsync(country));
 
-            foreach (var country in countries)
-            {
-                var countryNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == country.IsoCode))
+            var countriesDTWComparison = (await Task.WhenAll(tasks)).Where(x => x.Item2.Length > MIN_AMOUNT_OF_ENTRIES);
+
+            var otherTasks = countriesDTWComparison.Select(x => Task.Run(() => (x.Item1, MathHelper.CalculateDtw(ukrNewCasesSmoothed, x.Item2).Cost)));
+
+            var result = await Task.WhenAll(otherTasks);
+
+            ComparisonItems = new(result.OrderBy(t => t.Cost).Select(x => x.ToTuple()));
+        }
+
+        private async Task<(CountryItemModel, double[])> PrepareItemAsync(CountryItemModel country)
+        {
+            var countryNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == country.IsoCode))
                                 .OrderBy(l => l.Date)
                                 .Select(l => l.NewCasesOfSicknessPerMillion)
                                 .GetSmoothed(7)
                                 .ToArray();
 
-                if (countryNewCasesSmoothed.Length >= MIN_AMOUNT_OF_ENTRIES)
-                {
-                    var dtwRes = MathHelper.CalculateDtw(ukrNewCasesSmoothed, countryNewCasesSmoothed);
-
-                    countriesDTWComparison.Add(new Tuple<CountryItemModel, double>(country, dtwRes.Cost));
-                }
-            }
-
-            ComparisonItems = new(countriesDTWComparison.OrderBy(t => t.Item2).ToList());
-            // 77secs for 241elements - usual foreach
+            return (country, countryNewCasesSmoothed);
         }
 
         private void TestOnSmallData()
@@ -100,47 +103,6 @@ namespace CovidAnalysis.ViewModels.Tabs
             var y = new double[] { 0d, 0d, 0.5d, 2d, 0d, 1d, 0d };
 
             var dtwRes = MathHelper.CalculateDtw(x, y);
-        }
-
-        // gives different results from 40 to 100+ secs
-        // todo: optimize
-        private async Task ParallelCompareCountriesToUkraine()
-        {
-            var st = new Stopwatch(); st.Start();
-
-            var countries = await _countryService.GetCountriesListAsync();
-
-            var ukrNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == "UKR").ConfigureAwait(false))
-                                .OrderBy(l => l.Date)
-                                .Select(l => l.NewCasesOfSicknessPerMillion)
-                                .GetSmoothed(7)
-                                .ToArray();
-
-            var countriesDTWComparison = new ConcurrentBag<Tuple<CountryItemModel, double>>();
-
-            var calcTaks = countries.Select(async country =>
-            {
-                var countryNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == country.IsoCode).ConfigureAwait(false))
-                                .OrderBy(l => l.Date)
-                                .Select(l => l.NewCasesOfSicknessPerMillion)
-                                .GetSmoothed(7)
-                                .ToArray();
-
-                if (countryNewCasesSmoothed.Length >= MIN_AMOUNT_OF_ENTRIES)
-                {
-                    var dtwRes = MathHelper.CalculateDtw(ukrNewCasesSmoothed, countryNewCasesSmoothed);
-
-                    countriesDTWComparison.Add(new Tuple<CountryItemModel, double>(country, dtwRes.Cost));
-                }
-            });
-
-            await Task.WhenAll(calcTaks).ConfigureAwait(false);
-
-            ComparisonItems = new(countriesDTWComparison.OrderBy(t => t.Item2).ToList());
-
-            st.Stop();
-            var a = st.ElapsedMilliseconds / 1000;
-            st.Reset();
         }
 
         #endregion

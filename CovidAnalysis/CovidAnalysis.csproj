@@ -51,7 +51,6 @@
     <None Remove="Sharpnado.Tabs" />
     <None Remove="Views\" />
     <None Remove="Views\Tabs\" />
-    <None Remove="Recources\" />
     <None Remove="Xamarin.CommunityToolkit" />
     <None Remove="ViewModels\Tabs\" />
     <None Remove="Helpers\" />
@@ -72,7 +71,6 @@
     <Folder Include="Services\CountryService\" />
     <Folder Include="Views\" />
     <Folder Include="Views\Tabs\" />
-    <Folder Include="Recources\" />
     <Folder Include="ViewModels\Tabs\" />
     <Folder Include="Helpers\" />
     <Folder Include="Models\CalculationItems\" />

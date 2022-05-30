@@ -7,6 +7,8 @@ namespace CovidAnalysis.Helpers
 {
     public static class MathHelper
     {
+        #region -- Dynamic Time Warping Algorithm --
+
         public static DTWCalcResult CalculateDtw(double[] x1, double[] x2)
         {
             var n = x1.Length;
@@ -16,7 +18,7 @@ namespace CovidAnalysis.Helpers
 
             var transformationsMatrix = GetPrepopulatedTransformationsMatrix(n + 1, m + 1);
 
-            var tracebackMatrix = new Tuple<int, int>[n + 1, m + 1];
+            var tracebackMatrix = new (int, int)[n + 1, m + 1];
 
             // calculating transformations and traceback matrices
             for (int i = 1; i <= n; i++)
@@ -25,31 +27,28 @@ namespace CovidAnalysis.Helpers
                 {
                     var dist_i_j = dist[i - 1, j - 1];
 
-                    var penalty = new double[]
-                    {
-                        transformationsMatrix[i - 1, j],
+                    var penalty = Min(transformationsMatrix[i - 1, j],
                         transformationsMatrix[i - 1, j - 1],
-                        transformationsMatrix[i, j - 1],
-                    }.Min();
+                        transformationsMatrix[i, j - 1]);
 
                     transformationsMatrix[i, j] = dist_i_j + penalty;
 
                     if (penalty == transformationsMatrix[i - 1, j])
                     {
-                        tracebackMatrix[i, j] = new Tuple<int, int>(i - 1, j);
+                        tracebackMatrix[i, j] = new(i - 1, j);
                     }
                     else if (penalty == transformationsMatrix[i - 1, j - 1])
                     {
-                        tracebackMatrix[i, j] = new Tuple<int, int>(i - 1, j - 1);
+                        tracebackMatrix[i, j] = new(i - 1, j - 1);
                     }
                     else
                     {
-                        tracebackMatrix[i, j] = new Tuple<int, int>(i, j - 1);
+                        tracebackMatrix[i, j] = new(i, j - 1);
                     }
                 }
             }
 
-            // extracting shortest path from trac–eback matrix
+            // extracting shortest path from traceback matrix
             // calculating summary cost
 
             var shortestPath = new List<Tuple<int, int>>();
@@ -154,5 +153,20 @@ namespace CovidAnalysis.Helpers
 
             return result;
         }
+
+        private static double Min(double x, double y, double z)
+        {
+            double min = x;
+            if (x <= y && x <= z)
+                min = x;
+            if (y <= x && y <= z)
+                min = y;
+            if (z <= x && z <= y)
+                min = z;
+
+            return min;
+        }
+
+        #endregion
     }
 }
