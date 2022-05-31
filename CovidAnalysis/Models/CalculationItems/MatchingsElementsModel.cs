@@ -4,8 +4,8 @@ namespace CovidAnalysis.Models.CalculationItems
 {
     public class MatchingElementsModel
     {
-        public double X1Value { get; set; }
+        public float X1Value { get; set; }
 
-        public List<double> CorrespondingX2Values { get; set; }
+        public List<float> CorrespondingX2Values { get; set; }
     }
 }

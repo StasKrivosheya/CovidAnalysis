@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
-using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Models.LogEntryItem;
 using CovidAnalysis.Services.CountryService;
@@ -43,6 +41,7 @@ namespace CovidAnalysis.ViewModels
             MortalityChartTabViewModel = new MortalityChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
             IncidenceChartTabViewModel = new IncidenceChartTabViewModel(navigationService, logEntryService, countryService, pageDialogService);
             DtwTabViewModel = new DtwTabViewModel(navigationService, logEntryService, countryService);
+            PredictionTabViewModel = new PredictionTabViewModel(navigationService, logEntryService);
         }
 
         #region -- Public properties --
@@ -82,6 +81,13 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _dtwTabViewModel, value);
         }
 
+        private PredictionTabViewModel _predictionTabViewModel;
+        public PredictionTabViewModel PredictionTabViewModel
+        {
+            get => _predictionTabViewModel;
+            set => SetProperty(ref _predictionTabViewModel, value);
+        }
+
         private ICommand _downloadCommand;
         public ICommand DownloadCommand => _downloadCommand ??= new DelegateCommand(async () => await OnDownloadCommandAsync());
 
@@ -98,6 +104,7 @@ namespace CovidAnalysis.ViewModels
             MortalityChartTabViewModel.Initialize(parameters);
             IncidenceChartTabViewModel.Initialize(parameters);
             DtwTabViewModel.Initialize(parameters);
+            PredictionTabViewModel.Initialize(parameters);
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -112,6 +119,15 @@ namespace CovidAnalysis.ViewModels
             {
                 IncidenceChartTabViewModel.OnNavigatedTo(parameters);
             }
+            else if (SelectedViewModelIndex is 2)
+            {
+                DtwTabViewModel.OnNavigatedTo(parameters);
+            }
+            else if (SelectedViewModelIndex is 3)
+            {
+                PredictionTabViewModel.OnNavigatedTo(parameters);
+            }
+
         }
 
         #endregion

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CovidAnalysis.Extensions;
 using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
-using CovidAnalysis.Models.LogEntryItem;
 using CovidAnalysis.Services.CountryService;
 using CovidAnalysis.Services.LogEntryService;
 using Prism.Navigation;
@@ -34,8 +30,8 @@ namespace CovidAnalysis.ViewModels.Tabs
 
         #region -- Public properties --
 
-        private ObservableCollection<Tuple<CountryItemModel, double>> _comparisonItems;
-        public ObservableCollection<Tuple<CountryItemModel, double>> ComparisonItems
+        private ObservableCollection<Tuple<CountryItemModel, float>> _comparisonItems;
+        public ObservableCollection<Tuple<CountryItemModel, float>> ComparisonItems
         {
             get => _comparisonItems;
             set => SetProperty(ref _comparisonItems, value);
@@ -51,7 +47,7 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             Title = "Countries New-Cases-Of-Sickness per mln smoothes Comparing to UKR";
 
-            await CompareCountriesToUkraine();
+            // await CompareCountriesToUkraine(); todo: uncomment line
 
             // TestOnSmallData();
         }
@@ -86,7 +82,7 @@ namespace CovidAnalysis.ViewModels.Tabs
             ComparisonItems = new(result.OrderBy(t => t.Cost).Select(x => x.ToTuple()));
         }
 
-        private async Task<(CountryItemModel, double[])> PrepareItemAsync(CountryItemModel country)
+        private async Task<(CountryItemModel, float[])> PrepareItemAsync(CountryItemModel country)
         {
             var countryNewCasesSmoothed = (await _logEntryService.GetEntriesListAsync(e => e.IsoCode == country.IsoCode))
                                 .OrderBy(l => l.Date)
@@ -99,8 +95,8 @@ namespace CovidAnalysis.ViewModels.Tabs
 
         private void TestOnSmallData()
         {
-            var x = new double[] { 0d, 2d, 0d, 1d, 0d, 0d };
-            var y = new double[] { 0d, 0d, 0.5d, 2d, 0d, 1d, 0d };
+            var x = new float[] { 0f, 2f, 0f, 1f, 0f, 0f };
+            var y = new float[] { 0f, 0f, 0.5f, 2f, 0f, 1f, 0f };
 
             var dtwRes = MathHelper.CalculateDtw(x, y);
         }

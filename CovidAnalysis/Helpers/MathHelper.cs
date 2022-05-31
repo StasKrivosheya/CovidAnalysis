@@ -9,7 +9,7 @@ namespace CovidAnalysis.Helpers
     {
         #region -- Dynamic Time Warping Algorithm --
 
-        public static DTWCalcResult CalculateDtw(double[] x1, double[] x2)
+        public static DTWCalcResult CalculateDtw(float[] x1, float[] x2)
         {
             var n = x1.Length;
             var m = x2.Length;
@@ -52,7 +52,7 @@ namespace CovidAnalysis.Helpers
             // calculating summary cost
 
             var shortestPath = new List<Tuple<int, int>>();
-            var resultCost = 0d;
+            var resultCost = 0f;
 
             var k = n;
             var l = m;
@@ -88,7 +88,7 @@ namespace CovidAnalysis.Helpers
                 var correspondingColumns = currentRowTuples.Select(coordinate => coordinate.Item2 - 1).ToList();
 
                 // extracting corresponding x2 values
-                var correspondingColumnsValues = new List<double>();
+                var correspondingColumnsValues = new List<float>();
                 foreach (var index in correspondingColumns)
                 {
                     correspondingColumnsValues.Add(x2[index]);
@@ -112,12 +112,12 @@ namespace CovidAnalysis.Helpers
             return result;
         }
 
-        private static double[,] GetDistanceMatrix(double[] x1, double[] x2)
+        private static float[,] GetDistanceMatrix(float[] x1, float[] x2)
         {
             var n = x1.Length;
             var m = x2.Length;
 
-            var result = new double[n, m];
+            var result = new float[n, m];
 
             for (int i = 0; i < n; i++)
             {
@@ -130,9 +130,9 @@ namespace CovidAnalysis.Helpers
             return result;
         }
 
-        private static double[,] GetPrepopulatedTransformationsMatrix(int n, int m)
+        private static float[,] GetPrepopulatedTransformationsMatrix(int n, int m)
         {
-            var result = new double[n, m];
+            var result = new float[n, m];
 
             for (int i = 0; i < n; i++)
             {
@@ -140,11 +140,11 @@ namespace CovidAnalysis.Helpers
                 {
                     if (i is 0 || j is 0)
                     {
-                        result[i, j] = double.PositiveInfinity;
+                        result[i, j] = float.PositiveInfinity;
                     }
                     else
                     {
-                        result[i, j] = 0d;
+                        result[i, j] = 0f;
                     }
                 }
             }
@@ -154,9 +154,9 @@ namespace CovidAnalysis.Helpers
             return result;
         }
 
-        private static double Min(double x, double y, double z)
+        private static float Min(float x, float y, float z)
         {
-            double min = x;
+            float min = x;
             if (x <= y && x <= z)
                 min = x;
             if (y <= x && y <= z)
