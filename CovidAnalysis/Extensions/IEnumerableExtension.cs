@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CovidAnalysis.Extensions
@@ -46,6 +47,42 @@ namespace CovidAnalysis.Extensions
                 var average = sum / smoothingInterval;
 
                 result[i] = average;
+            }
+
+            return result;
+        }
+
+        // minimax normalization
+        public static IEnumerable<float> GetNormalized(this IEnumerable<float> src)
+        {
+            var sourceArr = src.ToArray();
+            var N = sourceArr.Length;
+            var min = sourceArr.Min();
+            var max = sourceArr.Max();
+
+            var result = new float[N];
+
+            for (int i = 0; i < N; i++)
+            {
+                result[i] = (sourceArr[i] - min) / (max - min);
+            }
+
+            return result;
+        }
+
+        // makes mean = 0, variance = 1
+        public static IEnumerable<float> GetStandartized(this IEnumerable<float> src)
+        {
+            var sourceArr = src.ToArray();
+            var N = sourceArr.Length;
+            var mean = sourceArr.Average();
+            var std = Math.Sqrt(Math.Pow(sourceArr.Select(u => u - mean).Sum(), 2) / N);
+
+            var result = new float[N];
+
+            for (int i = 0; i < N; i++)
+            {
+                result[i] = (sourceArr[i] - mean) / (float)std;
             }
 
             return result;

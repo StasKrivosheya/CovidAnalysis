@@ -13,6 +13,9 @@
         <ToolbarItem Text="Get last data"
                      Command="{Binding DownloadCommand}" />
 
+        <ToolbarItem Text="Forecast"
+                     Command="{Binding ForecastCommand}" />
+
     </ContentPage.ToolbarItems>
 
     <ContentPage.Resources>

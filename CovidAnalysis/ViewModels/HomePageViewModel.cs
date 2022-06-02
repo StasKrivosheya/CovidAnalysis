@@ -9,6 +9,7 @@ using CovidAnalysis.Extensions;
 using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Models.LogEntryItem;
+using CovidAnalysis.Pages;
 using CovidAnalysis.Services.CountryService;
 using CovidAnalysis.Services.LogEntryService;
 using CovidAnalysis.Services.StreamDownloader;
@@ -85,6 +86,9 @@ namespace CovidAnalysis.ViewModels
         private ICommand _downloadCommand;
         public ICommand DownloadCommand => _downloadCommand ??= new DelegateCommand(async () => await OnDownloadCommandAsync());
 
+        private ICommand _forecastCommand;
+        public ICommand ForecastCommand => _forecastCommand ??= new DelegateCommand(async () => await OnForecastommandAsync());
+
         #endregion
 
         #region -- Overrides --
@@ -111,6 +115,10 @@ namespace CovidAnalysis.ViewModels
             else if (SelectedViewModelIndex is 1)
             {
                 IncidenceChartTabViewModel.OnNavigatedTo(parameters);
+            }
+            else if (SelectedViewModelIndex is 2)
+            {
+                DtwTabViewModel.OnNavigatedTo(parameters);
             }
         }
 
@@ -182,6 +190,11 @@ namespace CovidAnalysis.ViewModels
             }
 
             await MortalityChartTabViewModel.DispayMortalityAsync(MortalityChartTabViewModel.SelectedCountry);
+        }
+
+        private Task OnForecastommandAsync()
+        {
+            return NavigationService.NavigateAsync(nameof(ForecastingPage));
         }
 
         #endregion

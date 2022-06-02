@@ -168,5 +168,152 @@ namespace CovidAnalysis.Helpers
         }
 
         #endregion
+
+        #region -- Forecasting --
+
+        public static class Forecasting
+        {
+            // If α is small (i.e., close to 0), more weight is given to observations from the more distant past.
+            // If α is large (i.e., close to 1), more weight is given to the more recent observations.
+            public static double SimpleExponentialSmoothing(List<double> y, double alpha)
+            {
+                var N = y.Count;
+                var nextValue = 0d;
+
+                for (int i = 0; i < N; i++)
+                {
+                    var y_t = y[N - 1 - i];
+                    var exp = Math.Pow(1 - alpha, i);
+
+                    var finalMiltiplier = alpha * exp;
+                    var addendum = finalMiltiplier * y_t;
+
+                    nextValue += addendum;
+                }
+
+                return nextValue;
+            }
+
+            public static List<double> SimpleExponentialSmoothing(List<double> y, int horizon, double alpha)
+            {
+                var result = new List<double>();
+
+                if (y.Count > 3)
+                {
+                    // l0 initialization
+                    var l = (y[0] + y[1] + y[2]) / 3;
+                    result.Add(l);
+
+                    for (int t = 1; t < y.Count; t++)
+                    {
+                        var previousL = result.LastOrDefault();
+
+                        l = (alpha * y[t]) + ((1 - alpha) * previousL);
+
+                        result.Add(l);
+                    }
+
+                    for (int h = 0; h < horizon; h++)
+                    {
+                        result.Add(result.LastOrDefault());
+                    }
+                }
+
+                return result;
+            }
+
+            public static List<double> HoltsLinearTrendForecast(List<double> y, int horizon, double alpha, double beta)
+            {
+                var result = new List<double>();
+
+                if (y.Count > 3)
+                {
+                    var coefficients = GetHoltsLinearTrendCoefficients(y, alpha, beta);
+                    var l_t = coefficients.Last().Item1;
+                    var b_t = coefficients.Last().Item2;
+
+                    for (int h = 1; h <= horizon; h++)
+                    {
+                        var forecastedY = l_t + (h * b_t);
+                        result.Add(forecastedY);
+                    }
+                }
+
+                return result;
+            }
+
+            private static List<(double, double)> GetHoltsLinearTrendCoefficients(List<double> y, double alpha, double beta)
+            {
+                var coefficients = new List<(double, double)>();
+
+                // l0 initialization
+                var l = (y[0] + y[1] + y[2]) / 3;
+                // b0 initialization
+                var b = 0d;
+                coefficients.Add((l, b));
+
+                for (int t = 1; t < y.Count; t++)
+                {
+                    var prevL = coefficients.Last().Item1;
+                    var prevB = coefficients.Last().Item2;
+
+                    l = (alpha * y[t]) + ((1 - alpha) * (prevL + prevB));
+                    b = (beta * (l - prevL)) + ((1 - beta) * prevB);
+
+                    coefficients.Add((l, b));
+                }
+
+                return coefficients;
+            }
+
+            // phi = 1  =>  Holt's method
+            // phi = 0  =>  SES method
+            public static List<double> DampedTrendForecast(List<double> y, int horizon, double alpha, double beta, double phi)
+            {
+                var result = new List<double>();
+
+                if (y.Count > 3)
+                {
+                    var coefficients = GetHoltsLinearTrendCoefficients(y, alpha, beta);
+                    var l_t = coefficients.Last().Item1;
+                    var b_t = coefficients.Last().Item2;
+
+                    var dampingMultiplier = 0d;
+                    for (int h = 1; h <= horizon; h++)
+                    {
+                        dampingMultiplier += Math.Pow(phi, h);
+                        var forecastedY = l_t + (dampingMultiplier * b_t);
+                        result.Add(forecastedY);
+                    }
+                }
+
+                return result;
+            }
+
+            // http://www.cleverstudents.ru/articles/mnk.html
+            // for linear regression - linear func approximation
+            public static (double, double) GetLinearRegressionCoeficients(List<double> y)
+            {
+                var N = y.Count;
+                var x = Enumerable.Range(1, N).ToArray();
+
+                var xSum = x.Sum();
+                var ySum = y.Sum();
+
+                var xySum = 0d;
+                for (int i = 0; i < N; i++)
+                {
+                    xySum += x[i] * y[i];
+                }
+
+                var a = ((N * xySum) - (xSum * ySum)) / ((N * x.Sum(v => Math.Pow(v, 2))) - Math.Pow(xSum, 2));
+
+                var b = (ySum - (a * xSum)) / N;
+
+                return (a, b);
+            }
+        }
+
+        #endregion
     }
 }

@@ -47,6 +47,7 @@ namespace CovidAnalysis
 
             containerRegistry.RegisterForNavigation<HomePage, HomePageViewModel>();
             containerRegistry.RegisterForNavigation<SelectOnePopupPage, SelectOnePopupPageViewModel>();
+            containerRegistry.RegisterForNavigation<ForecastingPage, ForecastingPageViewModel>();
 
             // services
             containerRegistry.RegisterInstance<IRepository>(Container.Resolve<Repository>());
