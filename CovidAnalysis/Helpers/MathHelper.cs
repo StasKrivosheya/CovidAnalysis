@@ -290,6 +290,96 @@ namespace CovidAnalysis.Helpers
                 return result;
             }
 
+            // the case where trend adds to the current level, but the seasonality is multiplicative
+            public static List<double> HoltWintersExponentialSmoothing(List<double> y, int horizon, int m, double alpha = -1, double beta = -1, double gamma = -1)
+            {
+                var result = new List<double>();
+                var N = y.Count;
+
+                if (N > 3)
+                {
+                    // setting initial value for l0
+                    var firstValuesInSeason = new List<double>();
+                    for (int i = 0; i < N; i++)
+                    {
+                        if (i % m == 0)
+                        {
+                            firstValuesInSeason.Add(y[i]);
+                        }
+                    }
+                    var l = new double[N];
+                    l[0] = firstValuesInSeason.Average();
+
+                    // setting initial value for b0 (for additive trend)
+                    var ratesOfChange = new List<double>();
+                    for (int i = 0; i < m; i++)
+                    {
+                        if (m + i > N - 1)
+                        {
+                            break;
+                        }
+                        var rateOfChange = (y[m + i] - y[i]) / m;
+
+                        ratesOfChange.Add(rateOfChange);
+                    }
+                    var b = new double[N];
+                    b[0] = ratesOfChange.Average();
+
+                    // setting initial values for the 1st season
+                    var s = new double[N];
+                    for (int i = 0; i < m; i++)
+                    {
+                        s[i] = y[i] / l[0];
+                    }
+
+                    // setting coefficients if necessary
+                    if (alpha == -1)
+                    {
+                        alpha = 1d / (2 * m);
+                    }
+                    if (beta == -1)
+                    {
+                        beta = 1d / (20 * m);
+                    }
+                    if (gamma == -1)
+                    {
+                        gamma = 1d / (20 * (1 - alpha));
+                    }
+
+                    // calculating parameters
+                    for (int i = 1; i < N; i++)
+                    {
+                        var prevL = l[i - 1];
+                        var prevB = b[i - 1];
+                        var prevSIndex = i > m
+                            ? i - 1 - m
+                            : i - 1;
+                        var prevS = s[prevSIndex];
+
+                        l[i] = (alpha * (y[i] / prevS)) + ((1 - alpha) * (prevL + prevB));
+                        var currL = l[i];
+
+                        b[i] = (beta * (currL - prevL)) + ((1 - beta) * prevB);
+
+                        s[i] = (gamma * (y[i] / currL)) + ((1 - gamma) * prevS);
+                    }
+
+                    for (int h = 1; h <= horizon; h++)
+                    {
+                        var lastL = l.Last();
+                        var lastB = b.Last();
+                        var prevS = s[(N + 1) + (h - 1) - m];
+
+                        var forecast = (lastL + (h * lastB)) * prevS;
+
+                        result.Add(forecast);
+                    }
+                }
+
+                return result;
+            }
+            
+
             // http://www.cleverstudents.ru/articles/mnk.html
             // for linear regression - linear func approximation
             public static (double, double) GetLinearRegressionCoeficients(List<double> y)

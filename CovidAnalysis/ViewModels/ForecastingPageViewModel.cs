@@ -51,6 +51,8 @@ namespace CovidAnalysis.ViewModels
             var beta = 0.2; // for Holt's methos
             var phi = 0.9; // for pumped Holt's method
             var h = 31;
+            var gamma = 0.1;
+            var season = 365;
             var rawData = ukrNewCases.Select(e => e.NewCasesOfSicknessPerMillion).ToList();
             //var rawData = atozmathDataSet;
 
@@ -115,7 +117,7 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries SESpredictionLine = new()
             {
-                Title = "Simple Exponensial Smoothing",
+                Title = "Single exponenеial smoothing",
                 StrokeThickness = 1.5,
             };
 
@@ -145,7 +147,8 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries HLTpredictionLine = new()
             {
-                Title = "Holt's linear trend",
+                Title = "Holt's linear trend (double exponential smoothing)",
+                Color = OxyColor.FromRgb(120, 48, 191),
                 StrokeThickness = 1.5,
             };
             var HLTValues = MathHelper.Forecasting.HoltsLinearTrendForecast(rawData, h, alpha, beta);
@@ -166,7 +169,8 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries DTRpredictionLine = new()
             {
-                Title = "Damped trend method",
+                Title = "Damped trend method (modified Holt's method)",
+                Color = OxyColor.FromRgb(33, 60, 217),
                 StrokeThickness = 1.5,
             };
             var DTRValues = MathHelper.Forecasting.DampedTrendForecast(rawData, h, alpha, beta, phi);
@@ -180,6 +184,26 @@ namespace CovidAnalysis.ViewModels
                 }
             }
             plotModel.Series.Add(DTRpredictionLine);
+
+            // ---------- HOLT-WINTER'S EXPONENTIAL SMOOTHING ----------
+
+            LineSeries HWEpredictionLine = new()
+            {
+                Title = "Holt-Winters method (triple exponential smoothing)",
+                Color = OxyColor.FromRgb(36, 191, 184),
+                StrokeThickness = 1.5,
+            };
+            var HWEValues = MathHelper.Forecasting.HoltWintersExponentialSmoothing(rawData, h, season, alpha, beta, gamma);
+            for (int t = startIndex; t < endIndex; t++)
+            {
+                var currentYValue = HWEValues[t - startIndex];
+
+                if (currentYValue >= 0)
+                {
+                    HWEpredictionLine.Points.Add(new DataPoint(t + 1, currentYValue));
+                }
+            }
+            plotModel.Series.Add(HWEpredictionLine);
 
             // ---------- UPDATING FINAL PLOT MODEL ----------
 
