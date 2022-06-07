@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
-using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Models.LogEntryItem;
 using CovidAnalysis.Pages;
@@ -55,6 +53,13 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _selectedViewModelIndex, value);
         }
 
+        private bool _hasDownloadedData;
+        public bool HasDownloadedData
+        {
+            get => _hasDownloadedData;
+            set => SetProperty(ref _hasDownloadedData, value);
+        }
+
         private bool _isDownloading;
         public bool IsDownloading
         {
@@ -93,15 +98,18 @@ namespace CovidAnalysis.ViewModels
 
         #region -- Overrides --
 
-        public override void Initialize(INavigationParameters parameters)
+        public override async void Initialize(INavigationParameters parameters)
         {
             base.Initialize(parameters);
 
             Title = "Home page";
 
+            var result = await _countryService.GetCountriesListAsync();
+            HasDownloadedData = result.Any();
+
             MortalityChartTabViewModel.Initialize(parameters);
             IncidenceChartTabViewModel.Initialize(parameters);
-            DtwTabViewModel.Initialize(parameters);
+            //DtwTabViewModel.Initialize(parameters);
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
@@ -177,6 +185,7 @@ namespace CovidAnalysis.ViewModels
             }
 
             IsDownloading = false;
+            HasDownloadedData = true;
 
             var downloadReportMessage = $"You've successfully downloaded all newest data.\nThere are {insertedCount} models in your local repository now.";
             Device.BeginInvokeOnMainThread(async () =>
@@ -194,7 +203,14 @@ namespace CovidAnalysis.ViewModels
 
         private Task OnForecastommandAsync()
         {
-            return NavigationService.NavigateAsync(nameof(ForecastingPage));
+            if (HasDownloadedData)
+            {
+                return NavigationService.NavigateAsync(nameof(ForecastingPage));
+            }
+            else
+            {
+                return _pageDialogService.DisplayAlertAsync("Error", "There's nothing to forecast because you haven't downloaded any data yet!", "Ok");
+            }
         }
 
         #endregion

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
@@ -37,6 +39,15 @@ namespace CovidAnalysis.ViewModels.Tabs
         }
 
         #region -- Public properties --
+
+        public List<string> LogEntryPropertyNames => Constants.LOG_ENTRY_PROPERTY_NAMES;
+
+        private string _selectedLogEntryProperty = Constants.LOG_ENTRY_PROPERTY_NAMES.First();
+        public string SelectedLogEntryProperty
+        {
+            get => _selectedLogEntryProperty;
+            set => SetProperty(ref _selectedLogEntryProperty, value);
+        }
 
         private bool _shouldShowRawData = true;
         public bool ShouldShowRawData
@@ -97,7 +108,10 @@ namespace CovidAnalysis.ViewModels.Tabs
         {
             base.OnPropertyChanged(args);
 
-            if (args.PropertyName is nameof(SelectedCountry) or nameof(ShouldShowRawData) or nameof(ShouldShowSmoothedData))
+            if (args.PropertyName is nameof(SelectedCountry)
+                                    or nameof(ShouldShowRawData)
+                                    or nameof(ShouldShowSmoothedData)
+                                    or nameof(SelectedLogEntryProperty))
             {
                 await DispayMortalityAsync(SelectedCountry);
             }
@@ -130,7 +144,7 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             var plotModel = new PlotModel
             {
-                Title = "New deaths attributed to COVID-19 per 1,000,000 people",
+                Title = SelectedLogEntryProperty,
                 LegendTitle = "Legend",
                 LegendPosition = LegendPosition.LeftTop,
             };
@@ -145,22 +159,24 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             var yAxis = new LinearAxis
             {
-                Title = "New deaths",
+                Title = "Values",
                 Position = AxisPosition.Left
             };
             plotModel.Axes.Add(yAxis);
+
+            var selectedPropertyName = Regex.Replace(SelectedLogEntryProperty, @"\s+", "");
 
             if (ShouldShowRawData)
             {
                 LineSeries rawDataLineSeries = new()
                 {
                     Color = OxyColor.Parse("#5EA701"),
-                    Title = $"New death per million, {country.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty}, {country.IsoCode}",
                 };
 
                 foreach (var entry in entriesToDisplay)
                 {
-                    rawDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
+                    rawDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
                 plotModel.Series.Add(rawDataLineSeries);
@@ -171,19 +187,19 @@ namespace CovidAnalysis.ViewModels.Tabs
                 LineSeries smoothedDataLineSeries = new()
                 {
                     Color = OxyColor.Parse("#D39D00"),
-                    Title = $"New death per million SMOOTHED, {country.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty} SMOOTHED, {country.IsoCode}",
                 };
 
-                var newDeathsCasesSmoothed = entriesToDisplay.Select(u => u.NewDeathsPerMillion).GetSmoothed(7).ToList();
+                var newDeathsCasesSmoothed = entriesToDisplay.Select(u => u.GetPropertyValueByName(selectedPropertyName)).GetSmoothed(7).ToList();
 
                 for (int i = 0; i < entriesToDisplay.Count - 1; i++)
                 {
-                    entriesToDisplay[i].NewDeathsPerMillion = newDeathsCasesSmoothed[i];
+                    entriesToDisplay[i].SetPropertyValueByName(selectedPropertyName, newDeathsCasesSmoothed[i]);
                 }
 
                 foreach (var entry in entriesToDisplay.OrderBy(e => e.Date))
                 {
-                    smoothedDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewDeathsPerMillion));
+                    smoothedDataLineSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
                 plotModel.Series.Add(smoothedDataLineSeries);

@@ -14,6 +14,7 @@
                      Command="{Binding DownloadCommand}" />
 
         <ToolbarItem Text="Forecast"
+                     IsEnabled="{Binding HasDownloadedData, Converter={StaticResource invertedBoolConverter}}"
                      Command="{Binding ForecastCommand}" />
 
     </ContentPage.ToolbarItems>
@@ -32,36 +33,51 @@
 
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="50, *">
+    <Grid>
 
-        <tabs:TabHostView Grid.Row="0"
-                          SelectedIndex="{Binding Source={x:Reference Switcher}, Path=SelectedIndex, Mode=TwoWay}">
+        <Label IsVisible="{Binding HasDownloadedData, Converter={StaticResource invertedBoolConverter}}"
+               Text="You don't have any data yet. Please, download the latest dataset to continue working"
+               VerticalTextAlignment="Center"
+               HorizontalTextAlignment="Center" />
 
-            <tabs:TabHostView.Tabs>
-                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Mortality Chart" />
-                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Sickness Comparison Chart" />
-                <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Dynamic Time Warping" />
-            </tabs:TabHostView.Tabs>
+        <ActivityIndicator IsVisible="{Binding IsDownloading}"
+                           IsRunning="{Binding IsDownloading}"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
 
-        </tabs:TabHostView>
+        <Grid IsVisible="{Binding HasDownloadedData}"
+              RowDefinitions="50, *">
 
-        <tabs:ViewSwitcher x:Name="Switcher"
-                           Grid.Row="1"
-                           SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}"
-                           IsVisible="{Binding IsDownloading, Converter={StaticResource invertedBoolConverter}}">
+            <tabs:TabHostView Grid.Row="0"
+                              SelectedIndex="{Binding Source={x:Reference Switcher}, Path=SelectedIndex, Mode=TwoWay}">
 
-            <tabsViews:MortalityChartTabView BindingContext="{Binding MortalityChartTabViewModel}" />
+                <tabs:TabHostView.Tabs>
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Explore country" />
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Compare countries" />
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Dynamic Time Warping" />
+                </tabs:TabHostView.Tabs>
 
-            <tabsViews:IncidenceChartTabView BindingContext="{Binding IncidenceChartTabViewModel}" />
+            </tabs:TabHostView>
 
-            <tabsViews:DtwTabView BindingContext="{Binding DtwTabViewModel}" />
+            <tabs:ViewSwitcher x:Name="Switcher"
+                               Grid.Row="1"
+                               SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}"
+                               IsVisible="{Binding IsDownloading, Converter={StaticResource invertedBoolConverter}}">
 
-        </tabs:ViewSwitcher>
+                <tabsViews:MortalityChartTabView BindingContext="{Binding MortalityChartTabViewModel}" />
 
-        <ActivityIndicator Grid.Row="1"
-                           IsVisible="{Binding IsDownloading}"
-                           IsRunning="{Binding IsDownloading}"/>
+                <tabsViews:IncidenceChartTabView BindingContext="{Binding IncidenceChartTabViewModel}" />
+
+                <tabsViews:DtwTabView BindingContext="{Binding DtwTabViewModel}" />
+
+            </tabs:ViewSwitcher>
+
+            <ActivityIndicator Grid.Row="1"
+                               IsVisible="{Binding IsDownloading}"
+                               IsRunning="{Binding IsDownloading}" />
+
+        </Grid>
 
     </Grid>
-    
+
 </ContentPage>
