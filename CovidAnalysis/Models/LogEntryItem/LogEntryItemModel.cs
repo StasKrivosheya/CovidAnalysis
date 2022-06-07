@@ -64,5 +64,15 @@ namespace CovidAnalysis.Models.LogEntryItem
         // [46] | new_people_vaccinated_smoothed_per_hundred
         // Daily number of people receiving their first vaccine dose (7-day smoothed) per 100 people in the total population
         public double NewPeopleVaccinatedSmoothedPerHundred { get; set; }
+
+        public double GetPropertyValueByName(string propertyName)
+        {
+            return (double)GetType().GetProperty(propertyName).GetValue(this);
+        }
+
+        public void SetPropertyValueByName(string propertyName, double value)
+        {
+            GetType().GetProperty(propertyName).SetValue(this, value);
+        }
     }
 }
