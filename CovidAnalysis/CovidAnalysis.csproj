@@ -3,27 +3,76 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2401" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
     <PackageReference Include="Prism.Unity.Forms" Version="8.1.97" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageReference Include="OxyPlot.Xamarin.Forms" Version="1.0.0" />
+    <PackageReference Include="Xamarin.Forms.InputKit" Version="3.7.2" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="2.1.0" />
+    <PackageReference Include="Prism.Plugin.Popups" Version="8.0.76" />
+    <PackageReference Include="Sharpnado.Tabs" Version="2.2.0" />
+    <PackageReference Include="Xamarin.CommunityToolkit" Version="2.0.2" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Prism.Unity.Forms" />
     <None Remove="Pages\" />
     <None Remove="ViewModels\" />
     <None Remove="Services\" />
+    <None Remove="Services\Downloader\" />
+    <None Remove="Events\" />
+    <None Remove="Models\" />
+    <None Remove="Models\LogEntryItemModel\" />
+    <None Remove="Newtonsoft.Json" />
+    <None Remove="sqlite-net-pcl" />
+    <None Remove="Services\Repository\" />
+    <None Remove="Services\LogEntryService\" />
+    <None Remove="Extensions\" />
+    <None Remove="OxyPlot.Xamarin.Forms" />
+    <None Remove="Xamarin.Forms.InputKit" />
+    <None Remove="XamForms.Autocomplete" />
+    <None Remove="Rg.Plugins.Popup" />
+    <None Remove="Prism.Plugin.Popups" />
+    <None Remove="Models\CountryItem\" />
+    <None Remove="Services\CountryService\" />
+    <None Remove="Sharpnado.Tabs" />
+    <None Remove="Views\" />
+    <None Remove="Views\Tabs\" />
+    <None Remove="Xamarin.CommunityToolkit" />
+    <None Remove="ViewModels\Tabs\" />
+    <None Remove="Helpers\" />
+    <None Remove="Models\CalculationItems\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\" />
     <Folder Include="ViewModels\" />
     <Folder Include="Services\" />
+    <Folder Include="Services\StreamDownloader\" />
+    <Folder Include="Events\" />
+    <Folder Include="Models\" />
+    <Folder Include="Models\LogEntryItem\" />
+    <Folder Include="Services\Repository\" />
+    <Folder Include="Services\LogEntryService\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Models\CountryItem\" />
+    <Folder Include="Services\CountryService\" />
+    <Folder Include="Views\" />
+    <Folder Include="Views\Tabs\" />
+    <Folder Include="ViewModels\Tabs\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Models\CalculationItems\" />
   </ItemGroup>
 </Project>

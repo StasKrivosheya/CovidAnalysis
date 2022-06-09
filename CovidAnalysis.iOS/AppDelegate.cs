@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Foundation;
+﻿using Foundation;
 using Prism;
 using Prism.Ioc;
 using UIKit;
@@ -24,7 +20,12 @@ namespace CovidAnalysis.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
+            Rg.Plugins.Popup.Popup.Init();
             global::Xamarin.Forms.Forms.Init();
+            OxyPlot.Xamarin.Forms.Platform.iOS.PlotViewRenderer.Init();
+            Plugin.InputKit.Platforms.iOS.Config.Init();
+            Sharpnado.Tabs.iOS.Preserver.Preserve();
+
             LoadApplication(new App(new iOSInitializer()));
 
             return base.FinishedLaunching(app, options);

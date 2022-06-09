@@ -1,7 +1,83 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ios="clr-namespace:Xamarin.Forms.PlatformConfiguration.iOSSpecific;assembly=Xamarin.Forms.Core"
+             xmlns:tabs="clr-namespace:Sharpnado.Tabs;assembly=Sharpnado.Tabs"
+             xmlns:tabsViews="clr-namespace:CovidAnalysis.Views.Tabs"
              x:Class="CovidAnalysis.Pages.HomePage"
+             ios:Page.UseSafeArea="true"
              Title="{Binding Title}">
-    
+
+    <ContentPage.ToolbarItems>
+
+        <ToolbarItem Text="Get last data"
+                     Command="{Binding DownloadCommand}" />
+
+        <ToolbarItem Text="Forecast"
+                     IsEnabled="{Binding HasDownloadedData, Converter={StaticResource invertedBoolConverter}}"
+                     Command="{Binding ForecastCommand}" />
+
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Resources>
+
+        <ResourceDictionary>
+
+            <Style x:Key="TabStyle" TargetType="tabs:UnderlinedTabItem">
+                <Setter Property="SelectedTabColor" Value="Black" />
+                <Setter Property="LabelSize" Value="14" />
+                <Setter Property="UnselectedLabelColor" Value="Gray" />
+            </Style>
+
+        </ResourceDictionary>
+
+    </ContentPage.Resources>
+
+    <Grid>
+
+        <Label IsVisible="{Binding HasDownloadedData, Converter={StaticResource invertedBoolConverter}}"
+               Text="You don't have any data yet. Please, download the latest dataset to continue working"
+               VerticalTextAlignment="Center"
+               HorizontalTextAlignment="Center" />
+
+        <ActivityIndicator IsVisible="{Binding IsDownloading}"
+                           IsRunning="{Binding IsDownloading}"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
+
+        <Grid IsVisible="{Binding HasDownloadedData}"
+              RowDefinitions="50, *">
+
+            <tabs:TabHostView Grid.Row="0"
+                              SelectedIndex="{Binding Source={x:Reference Switcher}, Path=SelectedIndex, Mode=TwoWay}">
+
+                <tabs:TabHostView.Tabs>
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Explore country" />
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Compare countries" />
+                    <tabs:UnderlinedTabItem Style="{StaticResource TabStyle}" Label="Dynamic Time Warping" />
+                </tabs:TabHostView.Tabs>
+
+            </tabs:TabHostView>
+
+            <tabs:ViewSwitcher x:Name="Switcher"
+                               Grid.Row="1"
+                               SelectedIndex="{Binding SelectedViewModelIndex, Mode=TwoWay}"
+                               IsVisible="{Binding IsDownloading, Converter={StaticResource invertedBoolConverter}}">
+
+                <tabsViews:MortalityChartTabView BindingContext="{Binding MortalityChartTabViewModel}" />
+
+                <tabsViews:IncidenceChartTabView BindingContext="{Binding IncidenceChartTabViewModel}" />
+
+                <tabsViews:DtwTabView BindingContext="{Binding DtwTabViewModel}" />
+
+            </tabs:ViewSwitcher>
+
+            <ActivityIndicator Grid.Row="1"
+                               IsVisible="{Binding IsDownloading}"
+                               IsRunning="{Binding IsDownloading}" />
+
+        </Grid>
+
+    </Grid>
+
 </ContentPage>
