@@ -291,6 +291,7 @@ namespace CovidAnalysis.Helpers
             }
 
             // the case where trend adds to the current level, but the seasonality is multiplicative
+            // m - season period
             public static List<double> HoltWintersExponentialSmoothing(List<double> y, int horizon, int m, double alpha = -1, double beta = -1, double gamma = -1)
             {
                 var result = new List<double>();
@@ -346,7 +347,7 @@ namespace CovidAnalysis.Helpers
                         gamma = 1d / (20 * (1 - alpha));
                     }
 
-                    // calculating parameters
+                    // calculating components
                     for (int i = 1; i < N; i++)
                     {
                         var prevL = l[i - 1];
@@ -368,7 +369,15 @@ namespace CovidAnalysis.Helpers
                     {
                         var lastL = l.Last();
                         var lastB = b.Last();
-                        var prevS = s[(N + 1) + (h - 1) - m];
+                        var prevSIndex = (N) + (h - 1) - m;
+
+                        // hack: getting index out of range exeption of horizon m > season
+                        while (prevSIndex > s.Length - 1)
+                        {
+                            prevSIndex -= m;
+                        }
+
+                        var prevS = s[prevSIndex];
 
                         var forecast = (lastL + (h * lastB)) * prevS;
 

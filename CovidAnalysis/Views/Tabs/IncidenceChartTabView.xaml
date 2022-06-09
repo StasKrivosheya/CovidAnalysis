@@ -54,6 +54,10 @@
 
             </Frame>
 
+            <Picker ItemsSource="{Binding LogEntryPropertyNames}"
+                    SelectedItem="{Binding SelectedLogEntryProperty}"
+                    Title="Select property to display" />
+
             <input:CheckBox IsChecked="{Binding ShouldShowRawData}"
                             Text="Show raw data"
                             HorizontalOptions="EndAndExpand"

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using CovidAnalysis.Extensions;
 using CovidAnalysis.Helpers;
 using CovidAnalysis.Services.LogEntryService;
 using OxyPlot;
@@ -24,6 +24,45 @@ namespace CovidAnalysis.ViewModels
             _logEntryService = logEntryService;
         }
 
+        #region -- Public properties --
+
+        private int _horizon = 31;
+        public int Horizon
+        {
+            get => _horizon;
+            set => SetProperty(ref _horizon, value);
+        }
+
+        // for SES
+        private double _alpha = 0.3;
+        public double Alpha
+        {
+            get => _alpha;
+            set => SetProperty(ref _alpha, value);
+        }
+
+        // for Holt's methos
+        private double _beta = 0.2;
+        public double Beta
+        {
+            get => _beta;
+            set => SetProperty(ref _beta, value);
+        }
+
+        private double _gamma = 0.1;
+        public double Gamma
+        {
+            get => _gamma;
+            set => SetProperty(ref _gamma, value);
+        }
+
+        private int _season = 365;
+        public int Season
+        {
+            get => _season;
+            set => SetProperty(ref _season, value);
+        }
+
         private PlotModel _forecastingPlot;
         public PlotModel ForecastingPlot
         {
@@ -31,33 +70,48 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _forecastingPlot, value);
         }
 
+        #endregion
+
+        #region -- Overrides --
+
         public override async void Initialize(INavigationParameters parameters)
         {
             base.Initialize(parameters);
 
-            await Forecast();
+            await ForecastAsync();
         }
 
-        private async Task Forecast()
+        protected override async void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+
+            if (args.PropertyName is nameof(Horizon)
+                                    or nameof(Alpha)
+                                    or nameof(Beta)
+                                    or nameof(Gamma)
+                                    or nameof(Season))
+            {
+                await ForecastAsync();
+            }
+        }
+
+        #endregion
+
+        #region -- Private helpers --
+
+        private async Task ForecastAsync()
         {
             var atozmathDataSet = new List<double> { 5.2, 4.9, 5.5, 4.9, 5.2, 5.7, 5.4, 5.8, 5.9, 6, 5.2, 4.8 };
-            var dummyMood = new List<double> { 2.1, 1.5, 2, 3, 0.5, 0 };
+
             var ukrNewCases = await _logEntryService.GetEntriesListAsync(e => e.IsoCode == "UKR");
             var warBegining = new DateTime(2022, 2, 24);
             ukrNewCases = ukrNewCases.OrderBy(e => e.Date).Where(e => e.Date < warBegining).ToList();
 
-
-            var alpha = 0.3; // for SES
-            var beta = 0.2; // for Holt's methos
             var phi = 0.9; // for pumped Holt's method
-            var h = 31;
-            var gamma = 0.1;
-            var season = 365;
             var rawData = ukrNewCases.Select(e => e.NewCasesOfSicknessPerMillion).ToList();
-            //var rawData = atozmathDataSet;
 
             var linRegrCoefficients = MathHelper.Forecasting.GetLinearRegressionCoeficients(rawData);
-            var nextVal = MathHelper.Forecasting.SimpleExponentialSmoothing(rawData, alpha);
+            var nextVal = MathHelper.Forecasting.SimpleExponentialSmoothing(rawData, Alpha);
 
             // ---------- CREATING THE PLOT ----------
 
@@ -102,7 +156,7 @@ namespace CovidAnalysis.ViewModels
                 + $"x {signB} " + Math.Abs(linRegrCoefficients.Item2).ToString("F5"),
                 StrokeThickness = 1,
             };
-            for (int i = 0; i < rawData.Count + h; i++)
+            for (int i = 0; i < rawData.Count + Horizon; i++)
             {
                 var linRegrValue = linRegrCoefficients.Item1 * i + linRegrCoefficients.Item2;
 
@@ -121,22 +175,7 @@ namespace CovidAnalysis.ViewModels
                 StrokeThickness = 1.5,
             };
 
-            //var expSmoothedValues = new List<double>();
-            //for (int i = 1; i < rawData.Count; i++)
-            //{
-            //    var newValue = MathHelper.Forecasting.SimpleExponentialSmoothing(rawData.GetRange(0, i), alpha);
-            //    expSmoothedValues.Add(newValue);
-            //    predictionLine.Points.Add(new DataPoint(i, newValue));
-            //}
-            //var originalSize = expSmoothedValues.Count;
-            //for (int i = originalSize; i < originalSize + h; i++)
-            //{
-            //    var newValue = MathHelper.Forecasting.SimpleExponentialSmoothing(expSmoothedValues, alpha);
-            //    expSmoothedValues.Add(newValue);
-            //    predictionLine.Points.Add(new DataPoint(i, newValue));
-            //}
-
-            var SESValues = MathHelper.Forecasting.SimpleExponentialSmoothing(rawData, h, alpha);
+            var SESValues = MathHelper.Forecasting.SimpleExponentialSmoothing(rawData, Horizon, Alpha);
             for (int i = 0; i < SESValues.Count; i++)
             {
                 SESpredictionLine.Points.Add(new DataPoint(i + 1, SESValues[i]));
@@ -151,9 +190,9 @@ namespace CovidAnalysis.ViewModels
                 Color = OxyColor.FromRgb(120, 48, 191),
                 StrokeThickness = 1.5,
             };
-            var HLTValues = MathHelper.Forecasting.HoltsLinearTrendForecast(rawData, h, alpha, beta);
+            var HLTValues = MathHelper.Forecasting.HoltsLinearTrendForecast(rawData, Horizon, Alpha, Beta);
             var startIndex = rawData.Count;
-            var endIndex = startIndex + h;
+            var endIndex = startIndex + Horizon;
             for (int t = startIndex; t < endIndex; t++)
             {
                 var currentYValue = HLTValues[t - startIndex];
@@ -173,7 +212,7 @@ namespace CovidAnalysis.ViewModels
                 Color = OxyColor.FromRgb(33, 60, 217),
                 StrokeThickness = 1.5,
             };
-            var DTRValues = MathHelper.Forecasting.DampedTrendForecast(rawData, h, alpha, beta, phi);
+            var DTRValues = MathHelper.Forecasting.DampedTrendForecast(rawData, Horizon, Alpha, Beta, phi);
             for (int t = startIndex; t < endIndex; t++)
             {
                 var currentYValue = DTRValues[t - startIndex];
@@ -193,7 +232,7 @@ namespace CovidAnalysis.ViewModels
                 Color = OxyColor.FromRgb(36, 191, 184),
                 StrokeThickness = 1.5,
             };
-            var HWEValues = MathHelper.Forecasting.HoltWintersExponentialSmoothing(rawData, h, season, alpha, beta, gamma);
+            var HWEValues = MathHelper.Forecasting.HoltWintersExponentialSmoothing(rawData, Horizon, Season, Alpha, Beta, Gamma);
             for (int t = startIndex; t < endIndex; t++)
             {
                 var currentYValue = HWEValues[t - startIndex];
@@ -209,5 +248,7 @@ namespace CovidAnalysis.ViewModels
 
             ForecastingPlot = plotModel;
         }
+
+        #endregion
     }
 }

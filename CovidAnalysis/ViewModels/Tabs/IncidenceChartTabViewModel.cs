@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CovidAnalysis.Extensions;
@@ -40,6 +42,15 @@ namespace CovidAnalysis.ViewModels.Tabs
         }
 
         #region -- Public properties --
+
+        public List<string> LogEntryPropertyNames => Constants.LOG_ENTRY_PROPERTY_NAMES;
+
+        private string _selectedLogEntryProperty = Constants.LOG_ENTRY_PROPERTY_NAMES.First();
+        public string SelectedLogEntryProperty
+        {
+            get => _selectedLogEntryProperty;
+            set => SetProperty(ref _selectedLogEntryProperty, value);
+        }
 
         private bool _shouldShowRawData = true;
         public bool ShouldShowRawData
@@ -114,8 +125,11 @@ namespace CovidAnalysis.ViewModels.Tabs
         {
             base.OnPropertyChanged(args);
 
-            if (args.PropertyName is nameof(FirstSelectedCountry) or nameof(SecondSelectedCountry)
-                                  or nameof(ShouldShowRawData) or nameof(ShouldShowSmoothedData))
+            if (args.PropertyName is nameof(FirstSelectedCountry)
+                                    or nameof(SecondSelectedCountry)
+                                    or nameof(ShouldShowRawData)
+                                    or nameof(ShouldShowSmoothedData)
+                                    or nameof(SelectedLogEntryProperty))
             {
                 await DispayMortalityAsync(FirstSelectedCountry, SecondSelectedCountry);
             }
@@ -154,7 +168,7 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             var plotModel = new PlotModel
             {
-                Title = "New confirmed cases of COVID-19 per 1,000,000 people.\nCounts can include probable cases, where reported.",
+                Title = SelectedLogEntryProperty,
                 LegendTitle = "Legend",
                 LegendPosition = LegendPosition.LeftTop,
             };
@@ -169,31 +183,33 @@ namespace CovidAnalysis.ViewModels.Tabs
 
             var yAxis = new LinearAxis
             {
-                Title = "New cases",
+                Title = "Values",
                 Position = AxisPosition.Left
             };
             plotModel.Axes.Add(yAxis);
+
+            var selectedPropertyName = Regex.Replace(SelectedLogEntryProperty, @"\s+", "");
 
             if (ShouldShowRawData)
             {
                 LineSeries country1RawSeries = new()
                 {
-                    Title = $"New cases per million, {country1.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty}, {country1.IsoCode}",
                 };
 
                 LineSeries country2RawSeries = new()
                 {
-                    Title = $"New cases per million, {country2.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty}, {country2.IsoCode}",
                 };
 
                 foreach (var entry in country1Entries)
                 {
-                    country1RawSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewCasesOfSicknessPerMillion));
+                    country1RawSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
                 foreach (var entry in country2Entries)
                 {
-                    country2RawSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewCasesOfSicknessPerMillion));
+                    country2RawSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
                 plotModel.Series.Add(country1RawSeries);
@@ -204,32 +220,32 @@ namespace CovidAnalysis.ViewModels.Tabs
             {
                 LineSeries country1SmoothedSeries = new()
                 {
-                    Title = $"New cases per million SMOOTHED, {country1.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty} SMOOTHED, {country1.IsoCode}",
                 };
 
                 LineSeries country2SmoothedSeries = new()
                 {
-                    Title = $"New cases per million SMOOTHED, {country2.IsoCode}",
+                    Title = $"{SelectedLogEntryProperty} SMOOTHED, {country2.IsoCode}",
                 };
 
-                var country1SicknessSmoothed = country1Entries.Select(u => u.NewCasesOfSicknessPerMillion).GetSmoothed(7).ToList();
+                var country1SicknessSmoothed = country1Entries.Select(u => u.GetPropertyValueByName(selectedPropertyName)).GetSmoothed(7).ToList();
                 for (int i = 0; i < country1Entries.Count - 1; i++)
                 {
-                    country1Entries[i].NewCasesOfSicknessPerMillion = country1SicknessSmoothed[i];
+                    country1Entries[i].SetPropertyValueByName(selectedPropertyName, country1SicknessSmoothed[i]);
                 }
                 foreach (var entry in country1Entries)
                 {
-                    country1SmoothedSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewCasesOfSicknessPerMillion));
+                    country1SmoothedSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
-                var country2SicknessSmoothed = country2Entries.Select(u => u.NewCasesOfSicknessPerMillion).GetSmoothed(7).ToList();
+                var country2SicknessSmoothed = country2Entries.Select(u => u.GetPropertyValueByName(selectedPropertyName)).GetSmoothed(7).ToList();
                 for (int i = 0; i < country2Entries.Count - 1; i++)
                 {
-                    country2Entries[i].NewCasesOfSicknessPerMillion = country2SicknessSmoothed[i];
+                    country2Entries[i].SetPropertyValueByName(selectedPropertyName, country2SicknessSmoothed[i]);
                 }
                 foreach (var entry in country2Entries)
                 {
-                    country2SmoothedSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.NewCasesOfSicknessPerMillion));
+                    country2SmoothedSeries.Points.Add(new DataPoint(entry.Date.ToOADate(), entry.GetPropertyValueByName(selectedPropertyName)));
                 }
 
                 plotModel.Series.Add(country1SmoothedSeries);

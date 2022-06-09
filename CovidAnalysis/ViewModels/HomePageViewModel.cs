@@ -109,7 +109,7 @@ namespace CovidAnalysis.ViewModels
 
             MortalityChartTabViewModel.Initialize(parameters);
             IncidenceChartTabViewModel.Initialize(parameters);
-            //DtwTabViewModel.Initialize(parameters);
+            DtwTabViewModel.Initialize(parameters);
         }
 
         public override void OnNavigatedTo(INavigationParameters parameters)
