@@ -2,12 +2,15 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using CovidAnalysis.Extensions;
 using CovidAnalysis.Helpers;
 using CovidAnalysis.Models.CountryItem;
 using CovidAnalysis.Services.CountryService;
 using CovidAnalysis.Services.LogEntryService;
+using Prism.Commands;
 using Prism.Navigation;
+using Xamarin.CommunityToolkit.UI.Views;
 
 namespace CovidAnalysis.ViewModels.Tabs
 {
@@ -37,17 +40,25 @@ namespace CovidAnalysis.ViewModels.Tabs
             set => SetProperty(ref _comparisonItems, value);
         }
 
+        private LayoutState _TabState = LayoutState.Empty;
+        public LayoutState TabState
+        {
+            get => _TabState;
+            set => SetProperty(ref _TabState, value);
+        }
+
+        private ICommand _calcRating;
+        public ICommand CalculateRatingCommand => _calcRating ??= new DelegateCommand(async () => await OnCalculateRatingommandAsync());
+
         #endregion
 
         #region -- Overrides --
 
-        public override async void Initialize(INavigationParameters parameters)
+        public override void Initialize(INavigationParameters parameters)
         {
             base.Initialize(parameters);
 
             Title = "Countries New-Cases-Of-Sickness per mln smoothes Comparing to UKR";
-
-            await CompareCountriesToUkraine();
 
             // TestOnSmallData();
         }
@@ -56,7 +67,16 @@ namespace CovidAnalysis.ViewModels.Tabs
 
         #region -- Private helpers --
 
-        private async Task CompareCountriesToUkraine()
+        private async Task OnCalculateRatingommandAsync()
+        {
+            TabState = LayoutState.Loading;
+
+            await CompareCountriesToUkraineAsync();
+
+            TabState = LayoutState.Success;
+        }
+
+        private async Task CompareCountriesToUkraineAsync()
         {
             var countries = await _countryService.GetCountriesListAsync();
 

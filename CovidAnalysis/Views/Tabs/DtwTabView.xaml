@@ -1,53 +1,79 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              x:Class="CovidAnalysis.Views.Tabs.DtwTabView">
 
-    <StackLayout Padding="10">
+    <StackLayout xct:StateLayout.CurrentState="{Binding TabState}">
 
-        <Label Text="{Binding Title}"
-               FontSize="Subtitle"
-               HorizontalTextAlignment="Center" />
+        <xct:StateLayout.StateViews>
 
-        <CollectionView ItemsSource="{Binding ComparisonItems}"
-                        BackgroundColor="White"
-                        ItemSizingStrategy="MeasureFirstItem">
+            <xct:StateView StateKey="Empty">
 
-            <CollectionView.ItemTemplate>
+                 <Button Text="Calculate Rating"
+                         Command="{Binding CalculateRatingCommand}" />
 
-                <DataTemplate>
+             </xct:StateView>
 
-                    <Grid ColumnDefinitions="0.4*, 1, 0.6*"
-                          ColumnSpacing="1"
-                          RowDefinitions="40, 1">
+             <xct:StateView StateKey="Loading">
 
-                        <Label Grid.Column="0"
-                               Margin="5,0,0,0"
-                               Text="{Binding Item1.CountryName}"
-                               TextColor="Black"
-                               VerticalTextAlignment="Center"/>
+                 <ActivityIndicator IsRunning="True"/>
 
-                        <BoxView Grid.Column="1"
-                                 Grid.RowSpan="2"
-                                 Color="Black"/>
+             </xct:StateView>
 
-                        <Label Grid.Column="2"
-                               Margin="5,0,0,0"
-                               Text="{Binding Item2}"
-                               TextColor="Black"
-                               VerticalTextAlignment="Center"/>
+            <xct:StateView StateKey="Success">
 
-                        <BoxView Grid.ColumnSpan="3"
-                                 Grid.Row="1"
-                                 Color="Black"/>
+                 <StackLayout Padding="10">
 
-                    </Grid>
+                    <Label Text="{Binding Title}"
+                           FontSize="Subtitle"
+                           HorizontalTextAlignment="Center" />
 
-                </DataTemplate>
+                    <CollectionView ItemsSource="{Binding ComparisonItems}"
+                                    BackgroundColor="White"
+                                    ItemSizingStrategy="MeasureFirstItem">
 
-            </CollectionView.ItemTemplate>
+                        <CollectionView.ItemTemplate>
 
-        </CollectionView>
+                            <DataTemplate>
+
+                                <Grid ColumnDefinitions="0.4*, 1, 0.6*"
+                                      ColumnSpacing="1"
+                                      RowDefinitions="40, 1">
+
+                                    <Label Grid.Column="0"
+                                           Margin="5,0,0,0"
+                                           Text="{Binding Item1.CountryName}"
+                                           TextColor="Black"
+                                           VerticalTextAlignment="Center"/>
+
+                                    <BoxView Grid.Column="1"
+                                             Grid.RowSpan="2"
+                                             Color="Black"/>
+
+                                    <Label Grid.Column="2"
+                                           Margin="5,0,0,0"
+                                           Text="{Binding Item2}"
+                                           TextColor="Black"
+                                           VerticalTextAlignment="Center"/>
+
+                                    <BoxView Grid.ColumnSpan="3"
+                                             Grid.Row="1"
+                                             Color="Black"/>
+
+                                </Grid>
+
+                            </DataTemplate>
+
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </StackLayout>
+
+             </xct:StateView>
+
+        </xct:StateLayout.StateViews>
 
     </StackLayout>
 
