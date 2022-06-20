@@ -413,6 +413,134 @@ namespace CovidAnalysis.Helpers
             }
         }
 
+        public static class ErrorsEstimating
+        {
+            public static (double, double, double) SESMeanAbsolutePercentageError(List<double> y, double alpha)
+            {
+                var horizon = 1;
+                var N = y.Count;
+                var trainingAmount = (int)(0.75 * N);
+
+                var absoluteErrors = new List<double>();
+                var absolutePercentageErrors = new List<double>();
+
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.SimpleExponentialSmoothing(trainingSubset, horizon, alpha);
+                    var forecastedY = forecasts.LastOrDefault();
+                    var actualY = y[i];
+
+                    var absoluteError = Math.Abs(actualY - forecastedY);
+                    absoluteErrors.Add(absoluteError);
+
+                    var absolutePercentageError = Math.Abs(actualY - forecastedY) / actualY;
+                    absolutePercentageErrors.Add(absolutePercentageError);
+                }
+
+                var meanAbsoluteError = absoluteErrors.Average();
+                var meanAbsolutePercentageError = absolutePercentageErrors.Average();
+
+                var diffsSquares = new List<double>();
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.SimpleExponentialSmoothing(trainingSubset, horizon, alpha);
+                    var forecastedY = forecasts.LastOrDefault();
+
+                    var diffSquare = Math.Pow(forecastedY - meanAbsoluteError, 2);
+                    diffsSquares.Add(diffSquare);
+                }
+
+                var StdErr = Math.Sqrt(diffsSquares.Average());
+
+                return (meanAbsoluteError, meanAbsolutePercentageError * 100, StdErr);
+            }
+
+            public static (double, double, double) HLTMeanAbsolutePercentageError(List<double> y, double alpha, double beta)
+            {
+                var horizon = 1;
+                var N = y.Count;
+                var trainingAmount = (int)(0.75 * N);
+
+                var absoluteErrors = new List<double>();
+                var absolutePercentageErrors = new List<double>();
+
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.HoltsLinearTrendForecast(trainingSubset, horizon, alpha, beta);
+                    var forecastedY = forecasts.LastOrDefault();
+                    var actualY = y[i];
+
+                    var absoluteError = Math.Abs(actualY - forecastedY);
+                    absoluteErrors.Add(absoluteError);
+
+                    var absolutePercentageError = Math.Abs(actualY - forecastedY) / actualY;
+                    absolutePercentageErrors.Add(absolutePercentageError);
+                }
+
+                var meanAbsoluteError = absoluteErrors.Average();
+                var meanAbsolutePercentageError = absolutePercentageErrors.Average();
+
+                var diffsSquares = new List<double>();
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.HoltsLinearTrendForecast(trainingSubset, horizon, alpha, beta);
+                    var forecastedY = forecasts.LastOrDefault();
+
+                    var diffSquare = Math.Pow(forecastedY - meanAbsoluteError, 2);
+                    diffsSquares.Add(diffSquare);
+                }
+
+                var StdErr = Math.Sqrt(diffsSquares.Average());
+
+                return (meanAbsoluteError, meanAbsolutePercentageError * 100, StdErr);
+            }
+
+            public static (double, double, double) HWMeanAbsolutePercentageError(List<double> y, int season, double alpha, double beta, double gamma)
+            {
+                var horizon = 1;
+                var N = y.Count;
+                var trainingAmount = (int)(0.75 * N);
+
+                var absolutePercentageErrors = new List<double>();
+                var absoluteErrors = new List<double>();
+
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.HoltWintersExponentialSmoothing(trainingSubset, horizon, season, alpha, beta, gamma);
+                    var forecastedY = forecasts.LastOrDefault();
+                    var actualY = y[i];
+                    var absoluteError = Math.Abs(actualY - forecastedY);
+                    var absolutePercentageError = absoluteError / actualY;
+
+                    absoluteErrors.Add(absoluteError);
+                    absolutePercentageErrors.Add(absolutePercentageError);
+                }
+
+                var meanAbsolutePercentageError = absolutePercentageErrors.Average();
+                var meanAbsoluteError = absoluteErrors.Average();
+
+                var diffsSquares = new List<double>();
+                for (int i = trainingAmount; i < N; i++)
+                {
+                    var trainingSubset = y.GetRange(0, i);
+                    var forecasts = Forecasting.HoltWintersExponentialSmoothing(trainingSubset, horizon, season, alpha, beta, gamma);
+                    var forecastedY = forecasts.LastOrDefault();
+
+                    var diffSquare = Math.Pow(forecastedY - meanAbsoluteError, 2);
+                    diffsSquares.Add(diffSquare);
+                }
+
+                var StdErr = Math.Sqrt(diffsSquares.Average());
+
+                return (meanAbsoluteError, meanAbsolutePercentageError * 100, StdErr);
+            }
+        }
+
         #endregion
     }
 }

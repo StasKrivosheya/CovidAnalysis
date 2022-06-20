@@ -51,8 +51,102 @@
 
             </StackLayout>
 
-        </StackLayout>
+            <StackLayout>
 
+                <StackLayout Margin="30, 0, 0, 0"
+                             Orientation="Horizontal">
+
+                    <StackLayout>
+
+                        <Label Text="SES MAE:" />
+
+                        <Label Text="{Binding SesMae, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="SES MAPE:" />
+
+                        <Label Text="{Binding SesMape, StringFormat='{0:F2} %'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="SES SD:" />
+
+                        <Label Text="{Binding SesStdErr, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout Margin="20, 0, 0, 0">
+
+                        <Label Text="HLT MAE:" />
+
+                        <Label Text="{Binding HltMae, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="HLT MAPE:" />
+
+                        <Label Text="{Binding HltMape, StringFormat='{0:F2} %'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="HLT SD:" />
+
+                        <Label Text="{Binding HltStdErr, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout Margin="20, 0, 0, 0">
+
+                        <Label Text="HW MAE:" />
+
+                        <Label Text="{Binding HwMae, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="HW MAPE:" />
+
+                        <Label Text="{Binding HwMape, StringFormat='{0:F2} %'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                    <StackLayout>
+
+                        <Label Text="HW SD:" />
+
+                        <Label Text="{Binding HwStdErr, StringFormat='{0:F2}'}"
+                               HorizontalTextAlignment="Center" />
+
+                    </StackLayout>
+
+                </StackLayout>
+
+                <Label Text="MAE - Mean Average Error, MAPE - Mean Average Percent Error, SD - Standart Deviation (of error)"
+                       FontSize="Small"
+                       HorizontalTextAlignment="Center"/>
+
+            </StackLayout>
+
+        </StackLayout>
+        
         <oxy:PlotView Grid.Row="1"
                       Model="{Binding ForecastingPlot}"
                       VerticalOptions="FillAndExpand"

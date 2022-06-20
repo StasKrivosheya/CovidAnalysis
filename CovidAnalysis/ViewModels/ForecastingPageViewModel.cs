@@ -63,6 +63,69 @@ namespace CovidAnalysis.ViewModels
             set => SetProperty(ref _season, value);
         }
 
+        private double _SesMape;
+        public double SesMape
+        {
+            get => _SesMape;
+            set => SetProperty(ref _SesMape, value);
+        }
+
+        private double _SesMae;
+        public double SesMae
+        {
+            get => _SesMae;
+            set => SetProperty(ref _SesMae, value);
+        }
+
+        private double _SesStdErr;
+        public double SesStdErr
+        {
+            get => _SesStdErr;
+            set => SetProperty(ref _SesStdErr, value);
+        }
+
+        private double _HltMape;
+        public double HltMape
+        {
+            get => _HltMape;
+            set => SetProperty(ref _HltMape, value);
+        }
+
+        private double _HltMae;
+        public double HltMae
+        {
+            get => _HltMae;
+            set => SetProperty(ref _HltMae, value);
+        }
+
+        private double _HltStdErr;
+        public double HltStdErr
+        {
+            get => _HltStdErr;
+            set => SetProperty(ref _HltStdErr, value);
+        }
+
+        private double _HwMape;
+        public double HwMape
+        {
+            get => _HwMape;
+            set => SetProperty(ref _HwMape, value);
+        }
+
+        private double _HwMae;
+        public double HwMae
+        {
+            get => _HwMae;
+            set => SetProperty(ref _HwMae, value);
+        }
+
+        private double _HwStdErr;
+        public double HwStdErr
+        {
+            get => _HwStdErr;
+            set => SetProperty(ref _HwStdErr, value);
+        }
+
         private PlotModel _forecastingPlot;
         public PlotModel ForecastingPlot
         {
@@ -79,6 +142,7 @@ namespace CovidAnalysis.ViewModels
             base.Initialize(parameters);
 
             await ForecastAsync();
+            await EstimateErrors();
         }
 
         protected override async void OnPropertyChanged(PropertyChangedEventArgs args)
@@ -92,6 +156,7 @@ namespace CovidAnalysis.ViewModels
                                     or nameof(Season))
             {
                 await ForecastAsync();
+                await EstimateErrors();
             }
         }
 
@@ -171,7 +236,7 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries SESpredictionLine = new()
             {
-                Title = "Single exponenеial smoothing",
+                Title = "SES - Single exponenеial smoothing",
                 StrokeThickness = 1.5,
             };
 
@@ -186,7 +251,7 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries HLTpredictionLine = new()
             {
-                Title = "Holt's linear trend (double exponential smoothing)",
+                Title = "HLT - Holt's linear trend (double exponential smoothing)",
                 Color = OxyColor.FromRgb(120, 48, 191),
                 StrokeThickness = 1.5,
             };
@@ -228,7 +293,7 @@ namespace CovidAnalysis.ViewModels
 
             LineSeries HWEpredictionLine = new()
             {
-                Title = "Holt-Winters method (triple exponential smoothing)",
+                Title = "HW - Holt-Winters method (triple exponential smoothing)",
                 Color = OxyColor.FromRgb(36, 191, 184),
                 StrokeThickness = 1.5,
             };
@@ -247,6 +312,20 @@ namespace CovidAnalysis.ViewModels
             // ---------- UPDATING FINAL PLOT MODEL ----------
 
             ForecastingPlot = plotModel;
+        }
+
+        private async Task EstimateErrors()
+        {
+            var ukrNewCases = await _logEntryService.GetEntriesListAsync(e => e.IsoCode == "UKR");
+            var warBegining = new DateTime(2022, 2, 24);
+            ukrNewCases = ukrNewCases.OrderBy(e => e.Date).Where(e => e.Date < warBegining).ToList();
+
+            var rawData = ukrNewCases.Select(e => e.NewCasesOfSicknessPerMillion).ToList();
+
+            (SesMae, SesMape, SesStdErr) = MathHelper.ErrorsEstimating.SESMeanAbsolutePercentageError(rawData, Alpha);
+            (HltMae, HltMape, HltStdErr) = MathHelper.ErrorsEstimating.HLTMeanAbsolutePercentageError(rawData, Alpha, Beta);
+            (HwMae, HwMape, HwStdErr) = MathHelper.ErrorsEstimating.HWMeanAbsolutePercentageError(rawData, Season, Alpha, Beta, Gamma);
+
         }
 
         #endregion
